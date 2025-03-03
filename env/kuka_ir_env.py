@@ -183,6 +183,32 @@ class KukaIrEnv(KukaGymEnv):
     np_img_arr = np.reshape(rgb, (self._height, self._width, 4))
     return np_img_arr[:, :, :3]
 
+
+  def _get_hand_cam(self):
+    self.l_fing_idx = 9
+    self.r_fing_idx = 12
+    l_fing_link = p.getLinkState(self._kuka.kukaUid, self.l_fing_idx)
+    r_fing_link = p.getLinkState(self._kuka.kukaUid, self.r_fing_idx)
+    
+    look = l_fing_link[0]
+    # print(look)
+    distance = 0.1
+    yaw, pitch, roll = 0, -90, 0
+    fov = 45.
+    aspect = self._width / self._height
+    near, far = 0.01, 10
+    
+    view_matrix = p.computeViewMatrixFromYawPitchRoll(look, distance, yaw, pitch, roll, 2)
+    proj_matrix = p.computeProjectionMatrixFOV(fov, aspect, near, far)
+    
+    img = p.getCameraImage(width=self._width, 
+                           height=self._height, 
+                           viewMatrix=view_matrix, 
+                           projectionMatrix=proj_matrix)
+    np_img = img[2]
+    np_img = np.reshape(np_img, (self._height, self._width, 4))  
+    return np_img[:, :, :3]
+
   def step(self, action):
     """Environment step.
 

@@ -38,7 +38,7 @@ class Kuka_sim:
                 
         for i in range(len(self.joint_ids)):
             self.param_ids.append(p.addUserDebugParameter(joint_name_lst[i].decode("utf-8"), -4, 4, i_pos[i]))
-        print(joint_name_lst)
+        # print(joint_name_lst)
         return
 
 
@@ -61,7 +61,8 @@ class Kuka_sim:
                 target_joint = p.readUserDebugParameter(self.param_ids[i])
                 p.setJointMotorControl2(self.kuka_id, self.joint_ids[i], p.POSITION_CONTROL, target_joint, force=5 * 240.)
                 current_joint = self.get_joint()
-                print(current_joint["qpos"])
+                self.get_hand_img()
+                # print(current_joint["qpos"])
             time.sleep(0.01)
             count += 1
         return
@@ -71,13 +72,18 @@ class Kuka_sim:
         screen = self.env._get_observation()        
         return Image.fromarray(screen.astype(np.uint8))
     
+    def get_hand_img(self):
+        screen = self.env._get_hand_cam()
+        img = Image.fromarray(screen.astype(np.uint8))
+        img.save("images/test2.jpg")
+        return
+    
 
 def main():
     env = KukaIrEnv(renders=True, isDiscrete=True)
     env.reset()
     kuka_sim = Kuka_sim(env)
     kuka_sim.init_pos()
-    print(kuka_sim.get_joint()["qpos"])
     
     p.setRealTimeSimulation(1)
     while True:
