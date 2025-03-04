@@ -1,10 +1,12 @@
-from pybullet_envs.bullet.kukaGymEnv import KukaGymEnv
+# from pybullet_envs.bullet.kukaGymEnv import KukaGymEnv
+from env.kukaGymEnv import KukaGymEnv
 import random
 import os
 from gym import spaces
 import time
 import pybullet as p
-import pybullet_envs.bullet.kuka as kuka
+# import pybullet_envs.bullet.kuka as kuka
+import kuka
 import numpy as np
 import pybullet_data
 import pdb
