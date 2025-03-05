@@ -743,7 +743,7 @@
         </material>
       </collision>
     </link>
-    <joint name='right_finger_base_joint' type='revolute'>
+    <joint name='right_finger_base_joint' type='fixed'>
       <parent>right_finger</parent>
       <child>right_finger_base</child>
     </joint>

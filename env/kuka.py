@@ -14,6 +14,7 @@ class Kuka:
 
   def __init__(self, urdfRootPath=pybullet_data.getDataPath(), timeStep=0.01):
     self.urdfRootPath = urdfRootPath
+    self.kuka_urdf = currentdir + "/../urdf/"
     self.timeStep = timeStep
     self.maxVelocity = .35
     self.maxForce = 200.
@@ -42,7 +43,7 @@ class Kuka:
     self.reset()
 
   def reset(self):
-    objects = p.loadSDF(os.path.join(self.urdfRootPath, "kuka_iiwa/kuka_with_gripper2.sdf"))
+    objects = p.loadSDF(os.path.join(self.kuka_urdf, "kuka_iiwa/kuka_with_gripper2.sdf"))
     self.kukaUid = objects[0]
     #for i in range (p.getNumJoints(self.kukaUid)):
     #  print(p.getJointInfo(self.kukaUid,i))
@@ -50,7 +51,7 @@ class Kuka:
                                       [0.000000, 0.000000, 0.000000, 1.000000])
     self.jointPositions = [
         0.006418, 0.413184, -0.011401, -1.589317, 0.005379, 1.137684, -0.006539, 0.000048,
-        -0.299912, 0.000000, -0.000043, 0.299960, 0.000000, -0.000200
+        -0.299912, 0.000000, -0.000043, 0.299960, 0.000000, -0.000200, 0, 0
     ]
     self.numJoints = p.getNumJoints(self.kukaUid)
     for jointIndex in range(self.numJoints):
