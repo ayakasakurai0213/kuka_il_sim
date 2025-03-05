@@ -30,7 +30,7 @@ class Kuka_sim:
         # get joints
         for i in range(p.getNumJoints(self.kuka_id)):
             info = p.getJointInfo(self.kuka_id, i)
-            # print(info)
+            print(info)
             joint_name = info[1]
             joint_type = info[2]
             if joint_type == p.JOINT_PRISMATIC or joint_type == p.JOINT_REVOLUTE:

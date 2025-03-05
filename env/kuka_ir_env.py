@@ -187,14 +187,12 @@ class KukaIrEnv(KukaGymEnv):
 
 
   def _get_hand_cam(self):
-    self.l_fing_idx = 9
-    self.r_fing_idx = 12
-    l_fing_link = p.getLinkState(self._kuka.kukaUid, self.l_fing_idx)
-    r_fing_link = p.getLinkState(self._kuka.kukaUid, self.r_fing_idx)
+    self.hand_cam_idx = 15
+    hand_cam_link = p.getLinkState(self._kuka.kukaUid, self.hand_cam_idx)
     
-    look = l_fing_link[0]
-    # print(look)
-    distance = 0.1
+    look = hand_cam_link[0]
+    print(look)
+    distance = 0.01
     yaw, pitch, roll = 0, -90, 0
     fov = 45.
     aspect = self._width / self._height
