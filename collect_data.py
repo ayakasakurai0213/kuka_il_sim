@@ -1,16 +1,14 @@
-# -- coding: UTF-8
 import os
 import time
 import numpy as np
 import h5py
 import argparse
 import dm_env
-
 import collections
-from collections import deque
-
-import sys
 import cv2
+from PIL import Image
+import pybullet as p
+from env.kuka_ir_env import KukaIrEnv
 
 # 保存数据函数
 def save_data(args, timesteps, actions, dataset_path):
@@ -78,10 +76,10 @@ def save_data(args, timesteps, actions, dataset_path):
                 _ = image_depth.create_dataset(cam_name, (data_size, 480, 640), dtype='uint16',
                                              chunks=(1, 480, 640), )
 
-        _ = obs.create_dataset('qpos', (data_size, 14))
-        _ = obs.create_dataset('qvel', (data_size, 14))
-        _ = obs.create_dataset('effort', (data_size, 14))
-        _ = root.create_dataset('action', (data_size, 14))
+        _ = obs.create_dataset('qpos', (data_size, 12))
+        _ = obs.create_dataset('qvel', (data_size, 12))
+        _ = obs.create_dataset('effort', (data_size, 12))
+        _ = root.create_dataset('action', (data_size, 12))
         _ = root.create_dataset('base_action', (data_size, 2))
 
         # data_dict write into h5py.File
@@ -90,101 +88,76 @@ def save_data(args, timesteps, actions, dataset_path):
     print(f'\033[32m\nSaving: {time.time() - t0:.1f} secs. %s \033[0m\n'%dataset_path)
 
 
-class RosOperator:
-    def __init__(self, args):
-        self.robot_base_deque = None
-        self.puppet_arm_right_deque = None
-        self.puppet_arm_left_deque = None
-        self.master_arm_right_deque = None
-        self.master_arm_left_deque = None
-        self.img_front_deque = None
-        self.img_right_deque = None
-        self.img_left_deque = None
-        self.img_front_depth_deque = None
-        self.img_right_depth_deque = None
-        self.img_left_depth_deque = None
-        self.bridge = None
+class KukaOperator:
+    def __init__(self, env, args):
+        self.env = env
+        self.kuka_id = self.env._kuka.kukaUid
         self.args = args
         self.init()
-        self.init_ros()
+        
 
     def init(self):
-        # self.bridge = CvBridge()
-        self.img_left_deque = deque()
-        self.img_right_deque = deque()
-        self.img_front_deque = deque()
-        self.img_left_depth_deque = deque()
-        self.img_right_depth_deque = deque()
-        self.img_front_depth_deque = deque()
-        self.master_arm_left_deque = deque()
-        self.master_arm_right_deque = deque()
-        self.puppet_arm_left_deque = deque()
-        self.puppet_arm_right_deque = deque()
-        self.robot_base_deque = deque()
+        self.joint_ids = []
+        self.param_ids = []
+        joint_name_lst = []
+        i_pos = [
+            0.006411874501842649, 0.41318442787173143, -0.01140244401433773, 
+            -1.5893163205429706, 0.005379, 1.1376840457008266, -0.006534958891813817, 
+            5.800820781903633e-05, -0.29991772759079405, -4.1277527065243654e-05, 
+            0.299948297597285, -0.0002196091555209944
+            ]
+        
+        # set joints
+        for i in range(p.getNumJoints(self.kuka_id)):
+            info = p.getJointInfo(self.kuka_id, i)
+            # print(info)
+            joint_name = info[1]
+            joint_type = info[2]
+            if joint_type == p.JOINT_PRISMATIC or joint_type == p.JOINT_REVOLUTE:
+                self.joint_ids.append(i) 
+                joint_name_lst.append(joint_name)
+                
+        for i in range(len(self.joint_ids)):
+            self.param_ids.append(p.addUserDebugParameter(joint_name_lst[i].decode("utf-8"), -4, 4, i_pos[i]))
+    
+
+    def get_joint(self):
+        joint_pos = {"qpos": [], "qvel": [], "torque": [], "effort": []}
+        keys = [i for i in joint_pos.keys()]
+        for i in range(len(self.joint_ids)):
+            joint_state = p.getJointState(self.kuka_id, self.joint_ids[i])
+            for j in range(len(joint_state)):
+                joint_pos[keys[j]].append(joint_state[j])
+        return joint_pos
+    
+    
+    def control_pos(self):
+        for i in range(len(self.param_ids)):
+            target_joint = p.readUserDebugParameter(self.param_ids[i])
+            p.setJointMotorControl2(self.kuka_id, self.joint_ids[i], p.POSITION_CONTROL, target_joint, force=5 * 240.)
+        time.sleep(0.01)
+    
+    
+    def get_screen(self):
+        screen = self.env._get_observation()  
+        img = Image.fromarray(screen.astype(np.uint8))     
+        return img
+    
+    def get_hand_img(self):
+        screen = self.env._get_hand_cam()
+        img = Image.fromarray(screen.astype(np.uint8))
+        return img
+
 
     def get_frame(self):
-        if len(self.img_left_deque) == 0 or len(self.img_right_deque) == 0 or len(self.img_front_deque) == 0 or \
-                (self.args.use_depth_image and (len(self.img_left_depth_deque) == 0 or len(self.img_right_depth_deque) == 0 or len(self.img_front_depth_deque) == 0)):
-            return False
-        if self.args.use_depth_image:
-            frame_time = min([self.img_left_deque[-1].header.stamp.to_sec(), self.img_right_deque[-1].header.stamp.to_sec(), self.img_front_deque[-1].header.stamp.to_sec(),
-                              self.img_left_depth_deque[-1].header.stamp.to_sec(), self.img_right_depth_deque[-1].header.stamp.to_sec(), self.img_front_depth_deque[-1].header.stamp.to_sec()])
-        else:
-            frame_time = min([self.img_left_deque[-1].header.stamp.to_sec(), self.img_right_deque[-1].header.stamp.to_sec(), self.img_front_deque[-1].header.stamp.to_sec()])
+        self.control_pos()
+        img_top = self.get_screen()
+        # print("img_top:", img_top.shape)
+        img_hand = self.get_hand_img()
+        arm_joint = self.get_joint()
 
-        if len(self.img_left_deque) == 0 or self.img_left_deque[-1].header.stamp.to_sec() < frame_time:
-            return False
-        if len(self.img_right_deque) == 0 or self.img_right_deque[-1].header.stamp.to_sec() < frame_time:
-            return False
-        if len(self.img_front_deque) == 0 or self.img_front_deque[-1].header.stamp.to_sec() < frame_time:
-            return False
-        if len(self.master_arm_left_deque) == 0 or self.master_arm_left_deque[-1].header.stamp.to_sec() < frame_time:
-            return False
-        if len(self.master_arm_right_deque) == 0 or self.master_arm_right_deque[-1].header.stamp.to_sec() < frame_time:
-            return False
-        if len(self.puppet_arm_left_deque) == 0 or self.puppet_arm_left_deque[-1].header.stamp.to_sec() < frame_time:
-            return False
-        if len(self.puppet_arm_right_deque) == 0 or self.puppet_arm_right_deque[-1].header.stamp.to_sec() < frame_time:
-            return False
-        if self.args.use_depth_image and (len(self.img_left_depth_deque) == 0 or self.img_left_depth_deque[-1].header.stamp.to_sec() < frame_time):
-            return False
-        if self.args.use_depth_image and (len(self.img_right_depth_deque) == 0 or self.img_right_depth_deque[-1].header.stamp.to_sec() < frame_time):
-            return False
-        if self.args.use_depth_image and (len(self.img_front_depth_deque) == 0 or self.img_front_depth_deque[-1].header.stamp.to_sec() < frame_time):
-            return False
-        if self.args.use_robot_base and (len(self.robot_base_deque) == 0 or self.robot_base_deque[-1].header.stamp.to_sec() < frame_time):
-            return False
-
-        while self.img_left_deque[0].header.stamp.to_sec() < frame_time:
-            self.img_left_deque.popleft()
-        img_left = self.bridge.imgmsg_to_cv2(self.img_left_deque.popleft(), 'passthrough')
-        # print("img_left:", img_left.shape)
-
-        while self.img_right_deque[0].header.stamp.to_sec() < frame_time:
-            self.img_right_deque.popleft()
-        img_right = self.bridge.imgmsg_to_cv2(self.img_right_deque.popleft(), 'passthrough')
-
-        while self.img_front_deque[0].header.stamp.to_sec() < frame_time:
-            self.img_front_deque.popleft()
-        img_front = self.bridge.imgmsg_to_cv2(self.img_front_deque.popleft(), 'passthrough')
-
-        while self.master_arm_left_deque[0].header.stamp.to_sec() < frame_time:
-            self.master_arm_left_deque.popleft()
-        master_arm_left = self.master_arm_left_deque.popleft()
-
-        while self.master_arm_right_deque[0].header.stamp.to_sec() < frame_time:
-            self.master_arm_right_deque.popleft()
-        master_arm_right = self.master_arm_right_deque.popleft()
-
-        while self.puppet_arm_left_deque[0].header.stamp.to_sec() < frame_time:
-            self.puppet_arm_left_deque.popleft()
-        puppet_arm_left = self.puppet_arm_left_deque.popleft()
-
-        while self.puppet_arm_right_deque[0].header.stamp.to_sec() < frame_time:
-            self.puppet_arm_right_deque.popleft()
-        puppet_arm_right = self.puppet_arm_right_deque.popleft()
-
-        img_left_depth = None
+        # ==============ここ=========================
+        img_top_depth = None
         if self.args.use_depth_image:
             while self.img_left_depth_deque[0].header.stamp.to_sec() < frame_time:
                 self.img_left_depth_deque.popleft()
@@ -192,32 +165,22 @@ class RosOperator:
             top, bottom, left, right = 40, 40, 0, 0
             img_left_depth = cv2.copyMakeBorder(img_left_depth, top, bottom, left, right, cv2.BORDER_CONSTANT, value=0)
 
-        img_right_depth = None
+        img_hand_depth = None
         if self.args.use_depth_image:
             while self.img_right_depth_deque[0].header.stamp.to_sec() < frame_time:
                 self.img_right_depth_deque.popleft()
             img_right_depth = self.bridge.imgmsg_to_cv2(self.img_right_depth_deque.popleft(), 'passthrough')
-        top, bottom, left, right = 40, 40, 0, 0
-        img_right_depth = cv2.copyMakeBorder(img_right_depth, top, bottom, left, right, cv2.BORDER_CONSTANT, value=0)
-
-        img_front_depth = None
-        if self.args.use_depth_image:
-            while self.img_front_depth_deque[0].header.stamp.to_sec() < frame_time:
-                self.img_front_depth_deque.popleft()
-            img_front_depth = self.bridge.imgmsg_to_cv2(self.img_front_depth_deque.popleft(), 'passthrough')
-        top, bottom, left, right = 40, 40, 0, 0
-        img_front_depth = cv2.copyMakeBorder(img_front_depth, top, bottom, left, right, cv2.BORDER_CONSTANT, value=0)
+            top, bottom, left, right = 40, 40, 0, 0
+            img_right_depth = cv2.copyMakeBorder(img_right_depth, top, bottom, left, right, cv2.BORDER_CONSTANT, value=0)
 
         robot_base = None
         if self.args.use_robot_base:
             while self.robot_base_deque[0].header.stamp.to_sec() < frame_time:
                 self.robot_base_deque.popleft()
             robot_base = self.robot_base_deque.popleft()
-
-        return (img_front, img_left, img_right, img_front_depth, img_left_depth, img_right_depth,
-                puppet_arm_left, puppet_arm_right, master_arm_left, master_arm_right, robot_base)
         
-        # return (img_above, img_arm, img_above_depth, img_arm_depth, arm_joint, robot_base)
+        return (img_top, img_hand, img_top_depth, img_hand_depth, arm_joint, robot_base)
+
 
     def process(self):
         timesteps = []
@@ -241,27 +204,27 @@ class RosOperator:
                 continue
             print_flag = True
             count += 1
-            (img_above, img_arm, img_above_depth, img_arm_depth, arm_joint, robot_base) = result
+            (img_top, img_hand, img_top_depth, img_hand_depth, arm_joint, robot_base) = result
             # image info
             image_dict = dict()
-            image_dict[self.args.camera_names[0]] = img_above
-            image_dict[self.args.camera_names[1]] = img_arm
+            image_dict[self.args.camera_names[0]] = img_top
+            image_dict[self.args.camera_names[1]] = img_hand
 
             # collecting joint data
             obs = collections.OrderedDict()  # ordered dict
             obs['images'] = image_dict
             if self.args.use_depth_image:
                 image_dict_depth = dict()
-                image_dict_depth[self.args.camera_names[0]] = img_above_depth
-                image_dict_depth[self.args.camera_names[1]] = img_arm_depth
+                image_dict_depth[self.args.camera_names[0]] = img_top_depth
+                image_dict_depth[self.args.camera_names[1]] = img_hand_depth
                 obs['images_depth'] = image_dict_depth
                 
-            # ============ここ=============
             obs['qpos'] = np.array(arm_joint["qpos"])
             actions.append(obs['qpos'])
             obs['qvel'] = np.array(arm_joint["qvel"])
             obs['effort'] = np.array(arm_joint["effort"])
             
+            # ============ここ=============
             if self.args.use_robot_base:
                 obs['base_vel'] = [robot_base.twist.twist.linear.x, robot_base.twist.twist.angular.z]
             else:
@@ -298,30 +261,24 @@ def get_arguments():
                         default="./data", required=False)
     parser.add_argument('--task_name', action='store', type=str, help='Task name.',
                         default="aloha_mobile_dummy", required=False)
-    parser.add_argument('--episode_idx', action='store', type=int, help='Episode index.',
-                        default=0, required=False)
-    
     parser.add_argument('--max_timesteps', action='store', type=int, help='Max_timesteps.',
                         default=500, required=False)
 
     parser.add_argument('--camera_names', action='store', type=str, help='camera_names',
-                        default=['cam_high', 'cam_wrist'], required=False)
+                        default=['cam_top', 'cam_wrist'], required=False)
     #  topic name of color image
-    parser.add_argument('--img_above_topic', action='store', type=str, help='img_above_topic',
-                        default='/camera_above/color/image_raw', required=False)
-    parser.add_argument('--img_arm_topic', action='store', type=str, help='img_arm_topic',
-                        default='/camera_arm/color/image_raw', required=False)
-    
+    parser.add_argument('--img_top_topic', action='store', type=str, help='img_top_topic',
+                        default='/camera_top/color/image_raw', required=False)
+    parser.add_argument('--img_hand_topic', action='store', type=str, help='img_hand_topic',
+                        default='/camera_hand/color/image_raw', required=False)
     # topic name of depth image
-    parser.add_argument('--img_above_depth_topic', action='store', type=str, help='img_above_depth_topic',
-                        default='/camera_above/depth/image_raw', required=False)
-    parser.add_argument('--img_arm_depth_topic', action='store', type=str, help='img_arm_depth_topic',
-                        default='/camera_arm/depth/image_raw', required=False)
-    
+    parser.add_argument('--img_top_depth_topic', action='store', type=str, help='img_top_depth_topic',
+                        default='/camera_top/depth/image_raw', required=False)
+    parser.add_argument('--img_hand_depth_topic', action='store', type=str, help='img_hand_depth_topic',
+                        default='/camera_hand/depth/image_raw', required=False)
     # topic name of arm
     parser.add_argument('--arm_topic', action='store', type=str, help='arm_topic',
                         default='/kuka_arm/joint', required=False)
-    
     # topic name of robot_base
     parser.add_argument('--robot_base_topic', action='store', type=str, help='robot_base_topic',
                         default='/odom', required=False)
@@ -339,22 +296,30 @@ def get_arguments():
 
 
 def main():
+    env = KukaIrEnv(renders=True, isDiscrete=True)
+    env.reset()
     args = get_arguments()
-    ros_operator = RosOperator(args)
-    timesteps, actions = ros_operator.process()
-    dataset_dir = os.path.join(args.dataset_dir, args.task_name)
+    kuka_operator = KukaOperator(env, args)
     
-    if(len(actions) < args.max_timesteps):
-        print("\033[31m\nSave failure, please record %s timesteps of data.\033[0m\n" %args.max_timesteps)
-        exit(-1)
+    p.setRealTimeSimulation(1)
+    episode_idx = 0
+    while True: 
+        timesteps, actions = kuka_operator.process()
+        dataset_dir = os.path.join(args.dataset_dir, args.task_name)
+        
+        if(len(actions) < args.max_timesteps):
+            print("\033[31m\nSave failure, please record %s timesteps of data.\033[0m\n" %args.max_timesteps)
+            exit(-1)
 
-    if not os.path.exists(dataset_dir):
-        os.makedirs(dataset_dir)
-    dataset_path = os.path.join(dataset_dir, "episode_" + str(args.episode_idx))
-    save_data(args, timesteps, actions, dataset_path)
+        if not os.path.exists(dataset_dir):
+            os.makedirs(dataset_dir)
+        dataset_path = os.path.join(dataset_dir, "episode_" + str(episode_idx))
+        save_data(args, timesteps, actions, dataset_path)
+        env.reset()
+        episode_idx += 1
 
 
 if __name__ == '__main__':
     main()
 
-# python collect_data.py --dataset_dir ~/data --max_timesteps 500 --episode_idx 0
+# python collect_data.py --dataset_dir ~/data --max_timesteps 500 --task_name "test_data"

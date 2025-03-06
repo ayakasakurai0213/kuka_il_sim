@@ -14,6 +14,7 @@ class Kuka_sim:
     def __init__(self, env):
         self.env = env
         self.kuka_id = self.env._kuka.kukaUid
+        self.init_pos()
      
    
     def init_pos(self):
@@ -69,13 +70,13 @@ class Kuka_sim:
     
     
     def get_screen(self):
-        screen = self.env._get_observation()  
+        screen = self.env._get_observation()[0]  
         img = Image.fromarray(screen.astype(np.uint8))
         # img.save("images/test.jpg")      
         return img
     
     def get_hand_img(self):
-        screen = self.env._get_hand_cam()
+        screen = self.env._get_hand_cam()[0]
         img = Image.fromarray(screen.astype(np.uint8))
         # img.save("images/test2.jpg")
         return img
@@ -85,7 +86,6 @@ def main():
     env = KukaIrEnv(renders=True, isDiscrete=True)
     env.reset()
     kuka_sim = Kuka_sim(env)
-    kuka_sim.init_pos()
     
     p.setRealTimeSimulation(1)
     while True:

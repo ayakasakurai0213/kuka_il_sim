@@ -181,9 +181,12 @@ class KukaIrEnv(KukaGymEnv):
                                height=self._height,
                                viewMatrix=self._view_matrix,
                                projectionMatrix=self._proj_matrix)
-    rgb = img_arr[2]
-    np_img_arr = np.reshape(rgb, (self._height, self._width, 4))
-    return np_img_arr[:, :, :3]
+    rgb = img_arr[2]    # 0: width, 1: height, 2: rgb_img, 3: depth_img, 4: seg_img
+    depth = img_arr[3]
+    np_rgb_img_arr = np.reshape(rgb, (self._height, self._width, 4))
+    # np_depth_img_arr = np.reshape(depth, (self._height, self._width, 4))
+    # return np_rgb_img_arr[:, :, :3], np_depth_img_arr[:, :, :3]
+    return np_rgb_img_arr[:, :, :3]
 
 
   def _get_hand_cam(self):
@@ -201,13 +204,16 @@ class KukaIrEnv(KukaGymEnv):
     view_matrix = p.computeViewMatrixFromYawPitchRoll(look, distance, yaw, pitch, roll, 2)
     proj_matrix = p.computeProjectionMatrixFOV(fov, aspect, near, far)
     
-    img = p.getCameraImage(width=self._width, 
+    img_arr = p.getCameraImage(width=self._width, 
                            height=self._height, 
                            viewMatrix=view_matrix, 
                            projectionMatrix=proj_matrix)
-    np_img = img[2]
-    np_img = np.reshape(np_img, (self._height, self._width, 4))  
-    return np_img[:, :, :3]
+    rgb = img_arr[2]
+    depth = img_arr[3]
+    np_rgb_img_arr = np.reshape(rgb, (self._height, self._width, 4))  
+    # np_depth_img_arr = np.reshape(depth, (self._height, self._width, 4))  
+    # return np_rgb_img_arr[:, :, :3], np_depth_img_arr[:, :, :3]
+    return np_rgb_img_arr[:, :, :3]
 
   def step(self, action):
     """Environment step.
