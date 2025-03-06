@@ -191,7 +191,7 @@ class KukaIrEnv(KukaGymEnv):
     hand_cam_link = p.getLinkState(self._kuka.kukaUid, self.hand_cam_idx)
     
     look = hand_cam_link[0]
-    print(look)
+    # print(look)
     distance = 0.01
     yaw, pitch, roll = 0, -90, 0
     fov = 45.

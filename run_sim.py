@@ -27,10 +27,10 @@ class Kuka_sim:
             0.299948297597285, -0.0002196091555209944
             ]
         
-        # get joints
+        # set joints
         for i in range(p.getNumJoints(self.kuka_id)):
             info = p.getJointInfo(self.kuka_id, i)
-            print(info)
+            # print(info)
             joint_name = info[1]
             joint_type = info[2]
             if joint_type == p.JOINT_PRISMATIC or joint_type == p.JOINT_REVOLUTE:
@@ -39,7 +39,6 @@ class Kuka_sim:
                 
         for i in range(len(self.joint_ids)):
             self.param_ids.append(p.addUserDebugParameter(joint_name_lst[i].decode("utf-8"), -4, 4, i_pos[i]))
-        # print(joint_name_lst)
         return
 
 
@@ -50,7 +49,6 @@ class Kuka_sim:
             joint_state = p.getJointState(self.kuka_id, self.joint_ids[i])
             for j in range(len(joint_state)):
                 joint_pos[keys[j]].append(joint_state[j])
-
         return joint_pos
     
     
@@ -62,7 +60,8 @@ class Kuka_sim:
                 target_joint = p.readUserDebugParameter(self.param_ids[i])
                 p.setJointMotorControl2(self.kuka_id, self.joint_ids[i], p.POSITION_CONTROL, target_joint, force=5 * 240.)
                 current_joint = self.get_joint()
-                self.get_hand_img()
+                top_img = self.get_screen()
+                hand_img = self.get_hand_img()
                 # print(current_joint["qpos"])
             time.sleep(0.01)
             count += 1
@@ -70,14 +69,16 @@ class Kuka_sim:
     
     
     def get_screen(self):
-        screen = self.env._get_observation()        
-        return Image.fromarray(screen.astype(np.uint8))
+        screen = self.env._get_observation()  
+        img = Image.fromarray(screen.astype(np.uint8))
+        # img.save("images/test.jpg")      
+        return img
     
     def get_hand_img(self):
         screen = self.env._get_hand_cam()
         img = Image.fromarray(screen.astype(np.uint8))
-        img.save("images/test2.jpg")
-        return
+        # img.save("images/test2.jpg")
+        return img
     
 
 def main():
@@ -89,8 +90,8 @@ def main():
     p.setRealTimeSimulation(1)
     while True:
         kuka_sim.control_pos()
-        img = kuka_sim.get_screen()
-        img.save("images/test.jpg")
+        # img = kuka_sim.get_screen()
+        # img.save("images/test.jpg")
         env.reset()
         
 
