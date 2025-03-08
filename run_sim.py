@@ -1,7 +1,7 @@
 import os
 root_dir = os.path.dirname(os.path.abspath(__file__))
 import numpy as np
-from PIL import Image
+import cv2
 import matplotlib.pyplot as plt
 
 import pybullet as p
@@ -71,14 +71,14 @@ class Kuka_sim:
     
     def get_screen(self):
         screen = self.env._get_observation()[0]  
-        img = Image.fromarray(screen.astype(np.uint8))
-        # img.save("images/test.jpg")      
+        img = cv2.cvtColor(screen, cv2.COLOR_RGB2BGR)
+        cv2.imwrite("images/test.jpg", img)      
         return img
     
     def get_hand_img(self):
         screen = self.env._get_hand_cam()[0]
-        img = Image.fromarray(screen.astype(np.uint8))
-        # img.save("images/test2.jpg")
+        img = cv2.cvtColor(screen, cv2.COLOR_RGB2BGR)
+        cv2.imwrite("images/test2.jpg", img)
         return img
     
 

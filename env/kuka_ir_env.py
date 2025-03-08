@@ -1,11 +1,9 @@
-# from pybullet_envs.bullet.kukaGymEnv import KukaGymEnv
 from env.kukaGymEnv import KukaGymEnv
 import random
 import os
 from gym import spaces
 import time
 import pybullet as p
-# import pybullet_envs.bullet.kuka as kuka
 import kuka
 import numpy as np
 import pybullet_data
@@ -145,7 +143,7 @@ class KukaIrEnv(KukaGymEnv):
     # Choose the objects in the bin.
     urdfList = self._get_random_object(self._numObjects, self._isTest)
     self._objectUids = self._randomly_place_objects(urdfList)
-    self._observation = self._get_observation()
+    self._observation = self._get_observation()[0]
     return np.array(self._observation)
 
   def _randomly_place_objects(self, urdfList):
@@ -182,11 +180,9 @@ class KukaIrEnv(KukaGymEnv):
                                viewMatrix=self._view_matrix,
                                projectionMatrix=self._proj_matrix)
     rgb = img_arr[2]    # 0: width, 1: height, 2: rgb_img, 3: depth_img, 4: seg_img
-    depth = img_arr[3]
     np_rgb_img_arr = np.reshape(rgb, (self._height, self._width, 4))
-    # np_depth_img_arr = np.reshape(depth, (self._height, self._width, 4))
-    # return np_rgb_img_arr[:, :, :3], np_depth_img_arr[:, :, :3]
-    return np_rgb_img_arr[:, :, :3]
+    np_depth_img_arr = img_arr[3] 
+    return np_rgb_img_arr[:, :, :3], np_depth_img_arr[:, :]
 
 
   def _get_hand_cam(self):
@@ -209,11 +205,10 @@ class KukaIrEnv(KukaGymEnv):
                            viewMatrix=view_matrix, 
                            projectionMatrix=proj_matrix)
     rgb = img_arr[2]
-    depth = img_arr[3]
-    np_rgb_img_arr = np.reshape(rgb, (self._height, self._width, 4))  
-    # np_depth_img_arr = np.reshape(depth, (self._height, self._width, 4))  
-    # return np_rgb_img_arr[:, :, :3], np_depth_img_arr[:, :, :3]
-    return np_rgb_img_arr[:, :, :3]
+    np_rgb_img_arr = np.reshape(rgb, (self._height, self._width, 4)) 
+    np_depth_img_arr = img_arr[3] 
+    return np_rgb_img_arr[:, :, :3], np_depth_img_arr[:, :]
+  
 
   def step(self, action):
     """Environment step.
@@ -299,7 +294,7 @@ class KukaIrEnv(KukaGymEnv):
         if finger_angle < 0:
           finger_angle = 0
       self._attempted_grasp = True
-    observation = self._get_observation()
+    observation = self._get_observation()[0]
     done = self._termination()
     reward = self._reward()
 

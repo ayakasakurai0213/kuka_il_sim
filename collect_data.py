@@ -6,16 +6,13 @@ import argparse
 import dm_env
 import collections
 import cv2
-from PIL import Image
 import pybullet as p
 from env.kuka_ir_env import KukaIrEnv
 
-# 保存数据函数
+
 def save_data(args, timesteps, actions, dataset_path):
-    # 数据字典
     data_size = len(actions)
     data_dict = {
-        # 一个是奖励里面的qpos，qvel， effort ,一个是实际发的acition
         '/observations/qpos': [],
         '/observations/qvel': [],
         '/observations/effort': [],
@@ -24,30 +21,23 @@ def save_data(args, timesteps, actions, dataset_path):
         # '/base_action_t265': [],
     }
 
-    # 相机字典  观察的图像
+    # camera image
     for cam_name in args.camera_names:
         data_dict[f'/observations/images/{cam_name}'] = []
         if args.use_depth_image:
             data_dict[f'/observations/images_depth/{cam_name}'] = []
 
     # len(action): max_timesteps, len(time_steps): max_timesteps + 1
-    # 动作长度 遍历动作
     while actions:
-        # 循环弹出一个队列
-        action = actions.pop(0)   # 动作  当前动作
-        ts = timesteps.pop(0)     # 奖励  前一帧
+        action = actions.pop(0)   # current action
+        ts = timesteps.pop(0)     # previous frame
 
-        # 往字典里面添值
-        # Timestep返回的qpos，qvel,effort
         data_dict['/observations/qpos'].append(ts.observation['qpos'])
         data_dict['/observations/qvel'].append(ts.observation['qvel'])
         data_dict['/observations/effort'].append(ts.observation['effort'])
-
-        # 实际发的action
         data_dict['/action'].append(action)
         data_dict['/base_action'].append(ts.observation['base_vel'])
 
-        # 相机数据
         # data_dict['/base_action_t265'].append(ts.observation['base_vel_t265'])
         for cam_name in args.camera_names:
             data_dict[f'/observations/images/{cam_name}'].append(ts.observation['images'][cam_name])
@@ -56,15 +46,11 @@ def save_data(args, timesteps, actions, dataset_path):
 
     t0 = time.time()
     with h5py.File(dataset_path + '.hdf5', 'w', rdcc_nbytes=1024**2*2) as root:
-        # 文本的属性：
-        # 1 是否仿真
-        # 2 图像是否压缩
-        #
-        root.attrs['sim'] = False
-        root.attrs['compress'] = False
+        # properties of the text
+        root.attrs['sim'] = False   # emulation
+        root.attrs['compress'] = False  # compressed images
 
-        # 创建一个新的组observations，观测状态组
-        # 图像组
+        # create groups of observations and images
         obs = root.create_group('observations')
         image = obs.create_group('images')
         for cam_name in args.camera_names:
@@ -106,7 +92,6 @@ class KukaOperator:
             5.800820781903633e-05, -0.29991772759079405, -4.1277527065243654e-05, 
             0.299948297597285, -0.0002196091555209944
             ]
-        
         # set joints
         for i in range(p.getNumJoints(self.kuka_id)):
             info = p.getJointInfo(self.kuka_id, i)
@@ -122,7 +107,7 @@ class KukaOperator:
     
 
     def get_joint(self):
-        joint_pos = {"qpos": [], "qvel": [], "torque": [], "effort": []}
+        joint_pos = {"qpos": [], "qvel": [], "torque": [], "effort": [], "base_action": None}
         keys = [i for i in joint_pos.keys()]
         for i in range(len(self.joint_ids)):
             joint_state = p.getJointState(self.kuka_id, self.joint_ids[i])
@@ -138,46 +123,31 @@ class KukaOperator:
         time.sleep(0.01)
     
     
-    def get_screen(self):
-        screen = self.env._get_observation()  
-        img = Image.fromarray(screen.astype(np.uint8))     
-        return img
+    def get_top_img(self):
+        rgb_img, depth_img = self.env._get_observation()
+        rgb_img = cv2.cvtColor(rgb_img, cv2.COLOR_RGB2BGR)
+        return rgb_img, depth_img
     
     def get_hand_img(self):
-        screen = self.env._get_hand_cam()
-        img = Image.fromarray(screen.astype(np.uint8))
-        return img
+        rgb_img, depth_img = self.env._get_hand_cam()
+        rgb_img = cv2.cvtColor(rgb_img, cv2.COLOR_RGB2BGR)
+        return rgb_img, depth_img
 
 
     def get_frame(self):
         self.control_pos()
-        img_top = self.get_screen()
+        img_top, img_top_depth = self.get_top_img()
         # print("img_top:", img_top.shape)
-        img_hand = self.get_hand_img()
+        img_hand, img_hand_depth = self.get_hand_img()
         arm_joint = self.get_joint()
 
-        # ==============ここ=========================
-        img_top_depth = None
-        if self.args.use_depth_image:
-            while self.img_left_depth_deque[0].header.stamp.to_sec() < frame_time:
-                self.img_left_depth_deque.popleft()
-            img_left_depth = self.bridge.imgmsg_to_cv2(self.img_left_depth_deque.popleft(), 'passthrough')
-            top, bottom, left, right = 40, 40, 0, 0
-            img_left_depth = cv2.copyMakeBorder(img_left_depth, top, bottom, left, right, cv2.BORDER_CONSTANT, value=0)
-
-        img_hand_depth = None
-        if self.args.use_depth_image:
-            while self.img_right_depth_deque[0].header.stamp.to_sec() < frame_time:
-                self.img_right_depth_deque.popleft()
-            img_right_depth = self.bridge.imgmsg_to_cv2(self.img_right_depth_deque.popleft(), 'passthrough')
-            top, bottom, left, right = 40, 40, 0, 0
-            img_right_depth = cv2.copyMakeBorder(img_right_depth, top, bottom, left, right, cv2.BORDER_CONSTANT, value=0)
+        if self.args.use_depth_image == False:
+            img_top_depth = None
+            img_hand_depth = None
 
         robot_base = None
         if self.args.use_robot_base:
-            while self.robot_base_deque[0].header.stamp.to_sec() < frame_time:
-                self.robot_base_deque.popleft()
-            robot_base = self.robot_base_deque.popleft()
+            robot_base = arm_joint["base_action"]
         
         return (img_top, img_hand, img_top_depth, img_hand_depth, arm_joint, robot_base)
 
@@ -224,13 +194,11 @@ class KukaOperator:
             obs['qvel'] = np.array(arm_joint["qvel"])
             obs['effort'] = np.array(arm_joint["effort"])
             
-            # ============ここ=============
             if self.args.use_robot_base:
-                obs['base_vel'] = [robot_base.twist.twist.linear.x, robot_base.twist.twist.angular.z]
+                obs['base_vel'] = robot_base
             else:
                 obs['base_vel'] = [0.0, 0.0]
 
-            # save only "first" in the first frame，save StepType.FIRST in "fisrt"
             if count == 1:
                 ts = dm_env.TimeStep(
                     step_type=dm_env.StepType.FIRST,
@@ -258,38 +226,20 @@ class KukaOperator:
 def get_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset_dir', action='store', type=str, help='Dataset_dir.',
-                        default="./data", required=False)
+                        default="./datasets", required=False)
     parser.add_argument('--task_name', action='store', type=str, help='Task name.',
-                        default="aloha_mobile_dummy", required=False)
+                        default="project_test", required=False)
+    parser.add_argument('--episode_idx', action='store', type=int, help='Episode index.',
+                        default=0, required=False)
     parser.add_argument('--max_timesteps', action='store', type=int, help='Max_timesteps.',
                         default=500, required=False)
-
     parser.add_argument('--camera_names', action='store', type=str, help='camera_names',
-                        default=['cam_top', 'cam_wrist'], required=False)
-    #  topic name of color image
-    parser.add_argument('--img_top_topic', action='store', type=str, help='img_top_topic',
-                        default='/camera_top/color/image_raw', required=False)
-    parser.add_argument('--img_hand_topic', action='store', type=str, help='img_hand_topic',
-                        default='/camera_hand/color/image_raw', required=False)
-    # topic name of depth image
-    parser.add_argument('--img_top_depth_topic', action='store', type=str, help='img_top_depth_topic',
-                        default='/camera_top/depth/image_raw', required=False)
-    parser.add_argument('--img_hand_depth_topic', action='store', type=str, help='img_hand_depth_topic',
-                        default='/camera_hand/depth/image_raw', required=False)
-    # topic name of arm
-    parser.add_argument('--arm_topic', action='store', type=str, help='arm_topic',
-                        default='/kuka_arm/joint', required=False)
-    # topic name of robot_base
-    parser.add_argument('--robot_base_topic', action='store', type=str, help='robot_base_topic',
-                        default='/odom', required=False)
+                        default=['cam_top', 'cam_hand'], required=False)
     parser.add_argument('--use_robot_base', action='store', type=bool, help='use_robot_base',
                         default=False, required=False)
     # collect depth image
     parser.add_argument('--use_depth_image', action='store', type=bool, help='use_depth_image',
                         default=False, required=False)
-    
-    parser.add_argument('--frame_rate', action='store', type=int, help='frame_rate',
-                        default=30, required=False)
     
     args = parser.parse_args()
     return args
@@ -302,8 +252,9 @@ def main():
     kuka_operator = KukaOperator(env, args)
     
     p.setRealTimeSimulation(1)
-    episode_idx = 0
+    episode_idx = args.episode_idx
     while True: 
+        env.reset()
         timesteps, actions = kuka_operator.process()
         dataset_dir = os.path.join(args.dataset_dir, args.task_name)
         
@@ -315,11 +266,11 @@ def main():
             os.makedirs(dataset_dir)
         dataset_path = os.path.join(dataset_dir, "episode_" + str(episode_idx))
         save_data(args, timesteps, actions, dataset_path)
-        env.reset()
         episode_idx += 1
+        time.sleep(5)
 
 
 if __name__ == '__main__':
     main()
 
-# python collect_data.py --dataset_dir ~/data --max_timesteps 500 --task_name "test_data"
+# python collect_data.py --dataset_dir ~/data --max_timesteps 500 --task_name "test_data" --episode_idx 0
