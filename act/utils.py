@@ -40,7 +40,7 @@ class EpisodicDataset(torch.utils.data.Dataset):
             if self.use_robot_base:
                 original_action_shape = (original_action_shape[0], original_action_shape[1] + 2)
 
-            start_ts = np.random.choice(max_action_len)  # 随机抽取一个索引
+            start_ts = np.random.choice(max_action_len)  # randomly selected index
             actions = root['/action'][1:]
             actions = np.append(actions, actions[-1][np.newaxis, :], axis=0)
             qpos = root['/observations/qpos'][start_ts]
@@ -150,16 +150,16 @@ def load_data(dataset_dir, num_episodes, arm_delay_time, use_depth_image,
     print(f'\nData from: {dataset_dir}\n')
 
     # obtain train test split
-    train_ratio = 0.8  # 数据集比例
-    shuffled_indices = np.random.permutation(num_episodes)  # 打乱
+    train_ratio = 0.8  # propotion of data sets
+    shuffled_indices = np.random.permutation(num_episodes)  # disrupt
 
     train_indices = shuffled_indices[:int(train_ratio * num_episodes)]
     val_indices = shuffled_indices[int(train_ratio * num_episodes):]
 
-    # obtain normalization stats for qpos and action  返回均值和方差
+    # obtain normalization stats for qpos and action
     norm_stats = get_norm_stats(dataset_dir, num_episodes, use_robot_base)
 
-    # construct dataset and dataloader 归一化处理  结构化处理数据
+    # construct dataset and dataloader
     train_dataset = EpisodicDataset(train_indices, dataset_dir, camera_names, norm_stats, arm_delay_time,
                                     use_depth_image, use_robot_base)
 

@@ -61,7 +61,7 @@ class Kuka_sim:
                 target_joint = p.readUserDebugParameter(self.param_ids[i])
                 p.setJointMotorControl2(self.kuka_id, self.joint_ids[i], p.POSITION_CONTROL, target_joint, force=5 * 240.)
                 current_joint = self.get_joint()
-                top_img = self.get_screen()
+                # top_img = self.get_screen()
                 hand_img = self.get_hand_img()
                 # print(current_joint["qpos"])
             time.sleep(0.01)

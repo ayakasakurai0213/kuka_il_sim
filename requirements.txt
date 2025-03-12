@@ -6,7 +6,7 @@
 pyquaternion==0.9.9
 pyyaml==6.0
 pexpect==4.8.0
-mujoco==2.3.7
+# mujoco==2.3.7
 dm_control==1.0.14
 matplotlib==3.7.5
 einops==0.7.0
@@ -14,9 +14,9 @@ packaging==23.0
 h5py==3.8.0
 ipython==8.12.3
 opencv-python==4.9.0.80
-rospkg==1.5.0
+# rospkg==1.5.0
 empy==3.3.4
-catkin-pkg
+# catkin-pkg
 diffusers==0.26.3
 termcolor==2.4.0
 imageio==2.34.0

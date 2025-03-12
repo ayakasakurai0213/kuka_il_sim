@@ -23,7 +23,7 @@ def train(args):
     TASK_CONFIGS = {
         args.task_name: {
             'dataset_dir': os.path.join(DATA_DIR, args.task_name),
-            'camera_names': ['cam_high', 'cam_left_wrist', 'cam_right_wrist'],
+            'camera_names': ['cam_top', 'cam_hand'],
             'num_episodes': args.num_episodes
         }
     }
@@ -273,16 +273,16 @@ def plot_history(train_history, validation_history, num_epochs, ckpt_dir, seed):
 def get_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset_dir', action='store', type=str, help='dataset_dir', default='./dataset', required=True)
-    parser.add_argument('--ckpt_dir', action='store', type=str, help='ckpt_dir', required=True)
+    parser.add_argument('--ckpt_dir', action='store', type=str, help='ckpt_dir', default='./ckpt', required=False)
     parser.add_argument('--num_episodes', action='store', type=int, help='num_episodes', required=True)
    
-    parser.add_argument('--pretrain_ckpt', action='store', type=str, help='pretrain_ckpt', default='', required=False)
-    parser.add_argument('--task_name', action='store', type=str, help='task_name', default='aloha_mobile_dummy', required=False)
+    parser.add_argument('--pretrain_ckpt', action='store', type=str, help='pretrain_ckpt', default='policy_best.ckpt', required=False)
+    parser.add_argument('--task_name', action='store', type=str, help='task_name', default='ploject_test', required=False)
     
     parser.add_argument('--ckpt_name', action='store', type=str, help='ckpt_name', default='policy_best.ckpt', required=False)
     parser.add_argument('--ckpt_stats_name', action='store', type=str, help='ckpt_stats_name', default='dataset_stats.pkl', required=False)
     parser.add_argument('--policy_class', action='store', type=str, help='policy_class, capitalize, CNNMLP, ACT, Diffusion', default='ACT', required=False)
-    parser.add_argument('--batch_size', action='store', type=int, help='batch_size', default=32, required=False)
+    parser.add_argument('--batch_size', action='store', type=int, help='batch_size', default=8, required=False)
     parser.add_argument('--seed', action='store', type=int, help='seed', default=0, required=False)
     parser.add_argument('--num_epochs', action='store', type=int, help='num_epochs', default=3000, required=False)
 
@@ -295,7 +295,7 @@ def get_arguments():
     parser.add_argument('--masks', action='store_true',
                         help="Train segmentation head if the flag is provided")
 
-    parser.add_argument('--state_dim', action='store', type=int, help='state_dim', default=14, required=False)
+    parser.add_argument('--state_dim', action='store', type=int, help='state_dim', default=12, required=False)
     parser.add_argument('--lr_backbone', action='store', type=float, help='lr_backbone', default=4e-5, required=False)
     parser.add_argument('--backbone', action='store', type=str, help='backbone', default='resnet18', required=False)
     parser.add_argument('--loss_function', action='store', type=str, help='loss_function l1 l2 l1+l2', default='l1', required=False)
@@ -334,4 +334,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-# python act/train.py --dataset_dir ~/data --pretrain_ckpt policy_best.ckpt --ckpt_dir ~/train_dir/ --num_episodes 20 --batch_size 10 --num_epochs 2000 
+# python act/train.py --dataset_dir ./datasets --ckpt_dir ./ckpt/project_test --task_name "project_test" --num_episodes 100 --num_epochs 3000

@@ -1,4 +1,5 @@
 from env.kukaGymEnv import KukaGymEnv
+import math
 import random
 import os
 from gym import spaces
@@ -185,25 +186,43 @@ class KukaIrEnv(KukaGymEnv):
     return np_rgb_img_arr[:, :, :3], np_depth_img_arr[:, :]
 
 
+  def quaternion_to_euler(self, quat):
+    x, y, z, w = quat
+    roll = math.atan2(2*(w*x + y*z), 1 - 2*(x**2 + y**2))
+    pitch = math.asin(2*(w*y - z*x))
+    yaw = math.atan2(2*(w*z + x*y), 1 - 2*(y**2 + z**2))
+    roll = math.degrees(roll)
+    pitch = math.degrees(pitch)
+    yaw = math.degrees(yaw)
+    return roll, pitch, yaw
+
+
   def _get_hand_cam(self):
     self.hand_cam_idx = 15
-    hand_cam_link = p.getLinkState(self._kuka.kukaUid, self.hand_cam_idx)
     
-    look = hand_cam_link[0]
-    # print(look)
-    distance = 0.01
-    yaw, pitch, roll = 0, -90, 0
+    cam_offset = np.array([0, 0, 0.01])
+    local_forward = np.array([0, 0, 1])
+    local_up = np.array([0, 1, 0])
+    
+    hand_cam_link = p.getLinkState(self._kuka.kukaUid, self.hand_cam_idx, computeForwardKinematics=True)
+    link_pos = np.array(hand_cam_link[0])
+    link_quat = hand_cam_link[1]
+    rot_matrix = np.array(p.getMatrixFromQuaternion(link_quat)).reshape(3, 3)
+    
+    cam_pos = link_pos + rot_matrix @ cam_offset
+    cam_target =  cam_pos + rot_matrix @ local_forward
+    up_vec = rot_matrix @ local_up
     fov = 45.
     aspect = self._width / self._height
     near, far = 0.01, 10
-    
-    view_matrix = p.computeViewMatrixFromYawPitchRoll(look, distance, yaw, pitch, roll, 2)
+        
+    view_matrix = p.computeViewMatrix(cam_pos, cam_target, up_vec)
     proj_matrix = p.computeProjectionMatrixFOV(fov, aspect, near, far)
     
     img_arr = p.getCameraImage(width=self._width, 
-                           height=self._height, 
-                           viewMatrix=view_matrix, 
-                           projectionMatrix=proj_matrix)
+                               height=self._height, 
+                               viewMatrix=view_matrix, 
+                               projectionMatrix=proj_matrix)
     rgb = img_arr[2]
     np_rgb_img_arr = np.reshape(rgb, (self._height, self._width, 4)) 
     np_depth_img_arr = img_arr[3] 
