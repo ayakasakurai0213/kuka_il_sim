@@ -54,19 +54,19 @@ def load_hdf5(dataset_dir, dataset_name):
     return qpos, qvel, effort, action, base_action, image_dict
 
 def main(args):
-    rospy.init_node("replay_node")
-    bridge = CvBridge()
-    img_left_publisher = rospy.Publisher(args.img_left_topic, Image, queue_size=10)
-    img_right_publisher = rospy.Publisher(args.img_right_topic, Image, queue_size=10)
-    img_front_publisher = rospy.Publisher(args.img_front_topic, Image, queue_size=10)
+    # rospy.init_node("replay_node")
+    # bridge = CvBridge()
+    # img_left_publisher = rospy.Publisher(args.img_left_topic, Image, queue_size=10)
+    # img_right_publisher = rospy.Publisher(args.img_right_topic, Image, queue_size=10)
+    # img_front_publisher = rospy.Publisher(args.img_front_topic, Image, queue_size=10)
     
-    puppet_arm_left_publisher = rospy.Publisher(args.puppet_arm_left_topic, JointState, queue_size=10)
-    puppet_arm_right_publisher = rospy.Publisher(args.puppet_arm_right_topic, JointState, queue_size=10)
+    # puppet_arm_left_publisher = rospy.Publisher(args.puppet_arm_left_topic, JointState, queue_size=10)
+    # puppet_arm_right_publisher = rospy.Publisher(args.puppet_arm_right_topic, JointState, queue_size=10)
     
-    master_arm_left_publisher = rospy.Publisher(args.master_arm_left_topic, JointState, queue_size=10)
-    master_arm_right_publisher = rospy.Publisher(args.master_arm_right_topic, JointState, queue_size=10)
+    # master_arm_left_publisher = rospy.Publisher(args.master_arm_left_topic, JointState, queue_size=10)
+    # master_arm_right_publisher = rospy.Publisher(args.master_arm_right_topic, JointState, queue_size=10)
     
-    robot_base_publisher = rospy.Publisher(args.robot_base_topic, Twist, queue_size=10)
+    # robot_base_publisher = rospy.Publisher(args.robot_base_topic, Twist, queue_size=10)
 
 
     dataset_dir = args.dataset_dir

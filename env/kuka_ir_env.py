@@ -124,6 +124,7 @@ class KukaIrEnv(KukaGymEnv):
     far = 10
     self._proj_matrix = p.computeProjectionMatrixFOV(fov, aspect, near, far)
 
+    self.finger_angle = 0.3
     self._attempted_grasp = False
     self._env_step = 0
     self.terminated = 0
@@ -198,13 +199,11 @@ class KukaIrEnv(KukaGymEnv):
 
 
   def _get_hand_cam(self):
-    self.hand_cam_idx = 15
-    
     cam_offset = np.array([0, 0, 0.01])
     local_forward = np.array([0, 0, 1])
     local_up = np.array([0, 1, 0])
     
-    hand_cam_link = p.getLinkState(self._kuka.kukaUid, self.hand_cam_idx, computeForwardKinematics=True)
+    hand_cam_link = p.getLinkState(self._kuka.kukaUid, self._kuka.kukaHandCamIndex, computeForwardKinematics=True)
     link_pos = np.array(hand_cam_link[0])
     link_quat = hand_cam_link[1]
     rot_matrix = np.array(p.getMatrixFromQuaternion(link_quat)).reshape(3, 3)
@@ -228,6 +227,43 @@ class KukaIrEnv(KukaGymEnv):
     np_depth_img_arr = img_arr[3] 
     return np_rgb_img_arr[:, :, :3], np_depth_img_arr[:, :]
   
+  
+  def arm_control(self, key: list):
+    """
+    0: stay, 1: right, 2: left, 3: front, 4: back, 5: down, 6: up, 
+    7: gripper CW, 8: gripper semi-CW, 9: gripper close
+    """
+    dv = 0.01
+    dx, dy, dz, da = 0, 0, 0, 0
+    
+    for idx in range(9):
+      if idx in key:
+        dx += [0, -dv, dv, 0, 0, 0, 0, 0, 0][idx]
+        dy += [0, 0, 0, -dv, dv, 0, 0, 0, 0][idx]
+        dz += [0, 0, 0, 0, 0, -dv, dv, 0, 0][idx]
+        da += [0, 0, 0, 0, 0, 0, 0, -0.25, 0.25][idx]
+    
+    action = [dx, dy, dz, da, self.finger_angle]
+    
+    self._kuka.applyAction(action)
+    for _ in range(self._actionRepeat):
+      p.stepSimulation()
+      
+    # If we are close to the bin, attempt grasp.
+    state = p.getLinkState(self._kuka.kukaUid, self._kuka.kukaEndEffectorIndex)
+    end_effector_pos = state[0]
+    if 9 in key:
+      grasp_action = [0, 0, 0, 0, self.finger_angle]
+      self._kuka.applyAction(grasp_action)
+      p.stepSimulation()
+      self.finger_angle -= 0.3 / 10.
+      if self.finger_angle < 0:
+        self.finger_angle = 0
+    else:
+      self.finger_angle += 0.3 / 10.
+      if self.finger_angle > 0.3:
+        self.finger_angle = 0.3
+
 
   def step(self, action):
     """Environment step.

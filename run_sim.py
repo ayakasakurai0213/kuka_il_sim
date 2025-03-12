@@ -1,3 +1,4 @@
+import sys
 import os
 root_dir = os.path.dirname(os.path.abspath(__file__))
 import numpy as np
@@ -61,6 +62,7 @@ class Kuka_sim:
                 target_joint = p.readUserDebugParameter(self.param_ids[i])
                 p.setJointMotorControl2(self.kuka_id, self.joint_ids[i], p.POSITION_CONTROL, target_joint, force=5 * 240.)
                 current_joint = self.get_joint()
+                # print(current_joint)
                 # top_img = self.get_screen()
                 hand_img = self.get_hand_img()
                 # print(current_joint["qpos"])
@@ -89,10 +91,14 @@ def main():
     
     p.setRealTimeSimulation(1)
     while True:
-        kuka_sim.control_pos()
+        # kuka_sim.control_pos()
         # img = kuka_sim.get_screen()
         # img.save("images/test.jpg")
         env.reset()
+        for i in range(30):
+            # キーボードまたはゲームパッド入力取得
+            env.arm_control([1, 3])
+            # env._get_hand_cam()
         
 
 if __name__ == "__main__": 
