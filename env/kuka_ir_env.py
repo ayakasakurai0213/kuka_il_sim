@@ -89,7 +89,7 @@ class KukaIrEnv(KukaGymEnv):
       self.cid = p.connect(p.SHARED_MEMORY)
       if (self.cid < 0):
         self.cid = p.connect(p.GUI)
-      p.resetDebugVisualizerCamera(1.3, 180, -41, [0.52, -0.2, -0.33])
+      p.resetDebugVisualizerCamera(1.3, 180, -41, [0.52, -0.2, -0.33], 0)
     else:
       self.cid = p.connect(p.DIRECT)
     self.seed()
@@ -185,17 +185,6 @@ class KukaIrEnv(KukaGymEnv):
     np_rgb_img_arr = np.reshape(rgb, (self._height, self._width, 4))
     np_depth_img_arr = img_arr[3] 
     return np_rgb_img_arr[:, :, :3], np_depth_img_arr[:, :]
-
-
-  def quaternion_to_euler(self, quat):
-    x, y, z, w = quat
-    roll = math.atan2(2*(w*x + y*z), 1 - 2*(x**2 + y**2))
-    pitch = math.asin(2*(w*y - z*x))
-    yaw = math.atan2(2*(w*z + x*y), 1 - 2*(y**2 + z**2))
-    roll = math.degrees(roll)
-    pitch = math.degrees(pitch)
-    yaw = math.degrees(yaw)
-    return roll, pitch, yaw
 
 
   def _get_hand_cam(self):

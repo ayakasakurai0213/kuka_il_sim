@@ -1,14 +1,11 @@
-import sys
 import os
 root_dir = os.path.dirname(os.path.abspath(__file__))
-import numpy as np
 import cv2
-import matplotlib.pyplot as plt
-
 import pybullet as p
 import time
-
 from env.kuka_ir_env import KukaIrEnv
+
+from keybord_control import Keyboard
 
 
 class Kuka_sim:
@@ -19,7 +16,7 @@ class Kuka_sim:
      
    
     def init_pos(self):
-        self.joint_ids = []
+        self.joint_ids = []     # 0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 13
         self.param_ids = []
         joint_name_lst = []
         i_pos = [
@@ -62,14 +59,11 @@ class Kuka_sim:
                 target_joint = p.readUserDebugParameter(self.param_ids[i])
                 p.setJointMotorControl2(self.kuka_id, self.joint_ids[i], p.POSITION_CONTROL, target_joint, force=5 * 240.)
                 current_joint = self.get_joint()
-                # print(current_joint)
                 # top_img = self.get_screen()
                 hand_img = self.get_hand_img()
-                # print(current_joint["qpos"])
             time.sleep(0.01)
             count += 1
         return
-    
     
     def get_screen(self):
         screen = self.env._get_observation()[0]  
@@ -88,17 +82,19 @@ def main():
     env = KukaIrEnv(renders=True, isDiscrete=True)
     env.reset()
     kuka_sim = Kuka_sim(env)
+    keyboard = Keyboard()
     
     p.setRealTimeSimulation(1)
     while True:
         # kuka_sim.control_pos()
-        # img = kuka_sim.get_screen()
-        # img.save("images/test.jpg")
         env.reset()
-        for i in range(30):
+        # kuka_sim.get_screen()
+        # kuka_sim.get_hand_img()
+        for i in range(1000):
             # キーボードまたはゲームパッド入力取得
-            env.arm_control([1, 3])
-            # env._get_hand_cam()
+            action, text = keyboard.get_pressed_key()
+            keyboard.update(text)
+            env.arm_control(action)
         
 
 if __name__ == "__main__": 

@@ -1,18 +1,23 @@
 #coding=utf-8
 import os
+import sys
+# sys.path.append("./")
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(base_dir)
 import numpy as np
 import cv2
 import h5py
 import argparse
-import rospy
+import pybullet as p
+from env.kuka_ir_env import KukaIrEnv
+# import rospy
 
-from cv_bridge import CvBridge
-from std_msgs.msg import Header
-from sensor_msgs.msg import Image, JointState
-from geometry_msgs.msg import Twist
+# from cv_bridge import CvBridge
+# from std_msgs.msg import Header
+# from sensor_msgs.msg import Image, JointState
+# from geometry_msgs.msg import Twist
 
-import sys
-sys.path.append("./")
+
 def load_hdf5(dataset_dir, dataset_name):
     dataset_path = os.path.join(dataset_dir, dataset_name + '.hdf5')
     if not os.path.isfile(dataset_path):
@@ -53,7 +58,77 @@ def load_hdf5(dataset_dir, dataset_name):
 
     return qpos, qvel, effort, action, base_action, image_dict
 
+
+def joint_init(env):
+    kuka_id = env._kuka.kukaUid
+    joint_ids = []
+    param_ids = []
+    joint_name_lst = []
+    i_pos = [
+        0.006411874501842649, 0.41318442787173143, -0.01140244401433773, 
+        -1.5893163205429706, 0.005379, 1.1376840457008266, -0.006534958891813817, 
+        5.800820781903633e-05, -0.29991772759079405, -4.1277527065243654e-05, 
+        0.299948297597285, -0.0002196091555209944
+        ]
+    # set joints
+    for i in range(p.getNumJoints(kuka_id)):
+        info = p.getJointInfo(kuka_id, i)
+        # print(info)
+        joint_name = info[1]
+        joint_type = info[2]
+        if joint_type == p.JOINT_PRISMATIC or joint_type == p.JOINT_REVOLUTE:
+            joint_ids.append(i) 
+            joint_name_lst.append(joint_name)
+            
+    # for i in range(len(joint_ids)):
+    #     param_ids.append(p.addUserDebugParameter(joint_name_lst[i].decode("utf-8"), -4, 4, i_pos[i]))
+
+
+def get_joint():
+    # joint_pos = {"qpos": [], "qvel": [], "torque": [], "effort": [], "base_action": None}
+    # keys = [i for i in joint_pos.keys()]
+    for i in range(len(joint_ids)):
+        joint_state = p.getJointState(kuka_id, joint_ids[i])
+        for j in range(len(joint_state)):
+            joint_pos[keys[j]].append(joint_state[j])
+    return joint_pos
+    
+
 def main(args):
+    dataset_dir = args.dataset_dir
+    episode_idx = args.episode_idx
+    task_name   = args.task_name
+    dataset_name = f'episode_{episode_idx}'
+    
+    kuka_id = env._kuka.kukaUid
+    joint_ids = []
+    param_ids = []
+    joint_name_lst = []
+    origin_joint = [
+        0.006411874501842649, 0.41318442787173143, -0.01140244401433773, 
+        -1.5893163205429706, 0.005379, 1.1376840457008266, -0.006534958891813817, 
+        5.800820781903633e-05, -0.29991772759079405, -4.1277527065243654e-05, 
+        0.299948297597285, -0.0002196091555209944
+        ]
+    # set joints
+    for i in range(p.getNumJoints(kuka_id)):
+        info = p.getJointInfo(kuka_id, i)
+        # print(info)
+        joint_name = info[1]
+        joint_type = info[2]
+        if joint_type == p.JOINT_PRISMATIC or joint_type == p.JOINT_REVOLUTE:
+            joint_ids.append(i) 
+            joint_name_lst.append(joint_name)
+            
+    # for i in range(len(joint_ids)):
+    #     param_ids.append(p.addUserDebugParameter(joint_name_lst[i].decode("utf-8"), -4, 4, i_pos[i]))
+    
+    joint_pos = []
+    for i in range(len(joint_ids)):
+        joint_state = p.getJointState(kuka_id, joint_ids[i])
+        joint_pos.append(joint_state[0])
+    
+    
     # rospy.init_node("replay_node")
     # bridge = CvBridge()
     # img_left_publisher = rospy.Publisher(args.img_left_topic, Image, queue_size=10)
@@ -67,16 +142,12 @@ def main(args):
     # master_arm_right_publisher = rospy.Publisher(args.master_arm_right_topic, JointState, queue_size=10)
     
     # robot_base_publisher = rospy.Publisher(args.robot_base_topic, Twist, queue_size=10)
-
-
-    dataset_dir = args.dataset_dir
-    episode_idx = args.episode_idx
-    task_name   = args.task_name
-    dataset_name = f'episode_{episode_idx}'
-
-    origin_left = [-0.0057,-0.031, -0.0122, -0.032, 0.0099, 0.0179, 0.2279]  
-    origin_right = [ 0.0616, 0.0021, 0.0475, -0.1013, 0.1097, 0.0872, 0.2279]
-
+    
+    # origin_right = [ 0.0616, 0.0021, 0.0475, -0.1013, 0.1097, 0.0872, 0.2279]
+    
+    env = KukaIrEnv(renders=True, isDiscrete=True)
+    env.reset()
+    
     
     joint_state_msg = JointState()
     joint_state_msg.header =  Header()
@@ -160,39 +231,39 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset_dir', action='store', type=str, help='Dataset dir.', required=True)
     parser.add_argument('--task_name', action='store', type=str, help='Task name.',
-                        default="aloha_mobile_dummy", required=False)
+                        default="project_test", required=False)
 
     parser.add_argument('--episode_idx', action='store', type=int, help='Episode index.',default=0, required=False)
     
     parser.add_argument('--camera_names', action='store', type=str, help='camera_names',
-                        default=['cam_high', 'cam_left_wrist', 'cam_right_wrist'], required=False)
+                        default=['cam_top', 'cam_hand'], required=False)
     
-    parser.add_argument('--img_front_topic', action='store', type=str, help='img_front_topic',
-                        default='/camera_f/color/image_raw', required=False)
-    parser.add_argument('--img_left_topic', action='store', type=str, help='img_left_topic',
-                        default='/camera_l/color/image_raw', required=False)
-    parser.add_argument('--img_right_topic', action='store', type=str, help='img_right_topic',
-                        default='/camera_r/color/image_raw', required=False)
+    # parser.add_argument('--img_front_topic', action='store', type=str, help='img_front_topic',
+    #                     default='/camera_f/color/image_raw', required=False)
+    # parser.add_argument('--img_left_topic', action='store', type=str, help='img_left_topic',
+    #                     default='/camera_l/color/image_raw', required=False)
+    # parser.add_argument('--img_right_topic', action='store', type=str, help='img_right_topic',
+    #                     default='/camera_r/color/image_raw', required=False)
     
-    parser.add_argument('--master_arm_left_topic', action='store', type=str, help='master_arm_left_topic',
-                        default='/master/joint_left', required=False)
-    parser.add_argument('--master_arm_right_topic', action='store', type=str, help='master_arm_right_topic',
-                        default='/master/joint_right', required=False)
+    # parser.add_argument('--master_arm_left_topic', action='store', type=str, help='master_arm_left_topic',
+    #                     default='/master/joint_left', required=False)
+    # parser.add_argument('--master_arm_right_topic', action='store', type=str, help='master_arm_right_topic',
+    #                     default='/master/joint_right', required=False)
     
-    parser.add_argument('--puppet_arm_left_topic', action='store', type=str, help='puppet_arm_left_topic',
-                        default='/puppet/joint_left', required=False)
-    parser.add_argument('--puppet_arm_right_topic', action='store', type=str, help='puppet_arm_right_topic',
-                        default='/puppet/joint_right', required=False)
+    # parser.add_argument('--puppet_arm_left_topic', action='store', type=str, help='puppet_arm_left_topic',
+    #                     default='/puppet/joint_left', required=False)
+    # parser.add_argument('--puppet_arm_right_topic', action='store', type=str, help='puppet_arm_right_topic',
+    #                     default='/puppet/joint_right', required=False)
     
-    parser.add_argument('--robot_base_topic', action='store', type=str, help='robot_base_topic',
-                        default='/cmd_vel', required=False)
+    # parser.add_argument('--robot_base_topic', action='store', type=str, help='robot_base_topic',
+    #                     default='/cmd_vel', required=False)
     parser.add_argument('--use_robot_base', action='store', type=bool, help='use_robot_base',
                         default=False, required=False)
     
-    parser.add_argument('--frame_rate', action='store', type=int, help='frame_rate',
-                        default=30, required=False)
+    # parser.add_argument('--frame_rate', action='store', type=int, help='frame_rate',
+    #                     default=30, required=False)
     
-    parser.add_argument('--only_pub_master', action='store_true', help='only_pub_master',required=False)
+    # parser.add_argument('--only_pub_master', action='store_true', help='only_pub_master',required=False)
     
     
 
