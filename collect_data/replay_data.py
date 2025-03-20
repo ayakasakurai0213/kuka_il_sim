@@ -1,21 +1,14 @@
-#coding=utf-8
 import os
 import sys
-# sys.path.append("./")
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(base_dir)
+import time
 import numpy as np
 import cv2
 import h5py
 import argparse
 import pybullet as p
 from env.kuka_ir_env import KukaIrEnv
-# import rospy
-
-# from cv_bridge import CvBridge
-# from std_msgs.msg import Header
-# from sensor_msgs.msg import Image, JointState
-# from geometry_msgs.msg import Twist
 
 
 def load_hdf5(dataset_dir, dataset_name):
@@ -57,41 +50,6 @@ def load_hdf5(dataset_dir, dataset_name):
             image_dict[cam_name] = image_list
 
     return qpos, qvel, effort, action, base_action, image_dict
-
-
-def joint_init(env):
-    kuka_id = env._kuka.kukaUid
-    joint_ids = []
-    param_ids = []
-    joint_name_lst = []
-    i_pos = [
-        0.006411874501842649, 0.41318442787173143, -0.01140244401433773, 
-        -1.5893163205429706, 0.005379, 1.1376840457008266, -0.006534958891813817, 
-        5.800820781903633e-05, -0.29991772759079405, -4.1277527065243654e-05, 
-        0.299948297597285, -0.0002196091555209944
-        ]
-    # set joints
-    for i in range(p.getNumJoints(kuka_id)):
-        info = p.getJointInfo(kuka_id, i)
-        # print(info)
-        joint_name = info[1]
-        joint_type = info[2]
-        if joint_type == p.JOINT_PRISMATIC or joint_type == p.JOINT_REVOLUTE:
-            joint_ids.append(i) 
-            joint_name_lst.append(joint_name)
-            
-    # for i in range(len(joint_ids)):
-    #     param_ids.append(p.addUserDebugParameter(joint_name_lst[i].decode("utf-8"), -4, 4, i_pos[i]))
-
-
-def get_joint():
-    # joint_pos = {"qpos": [], "qvel": [], "torque": [], "effort": [], "base_action": None}
-    # keys = [i for i in joint_pos.keys()]
-    for i in range(len(joint_ids)):
-        joint_state = p.getJointState(kuka_id, joint_ids[i])
-        for j in range(len(joint_state)):
-            joint_pos[keys[j]].append(joint_state[j])
-    return joint_pos
     
 
 def main(args):
@@ -100,6 +58,8 @@ def main(args):
     task_name   = args.task_name
     dataset_name = f'episode_{episode_idx}'
     
+    env = KukaIrEnv(renders=True, isDiscrete=True)
+    env.reset()
     kuka_id = env._kuka.kukaUid
     joint_ids = []
     param_ids = []
@@ -118,118 +78,39 @@ def main(args):
         joint_type = info[2]
         if joint_type == p.JOINT_PRISMATIC or joint_type == p.JOINT_REVOLUTE:
             joint_ids.append(i) 
-            joint_name_lst.append(joint_name)
-            
-    # for i in range(len(joint_ids)):
-    #     param_ids.append(p.addUserDebugParameter(joint_name_lst[i].decode("utf-8"), -4, 4, i_pos[i]))
-    
-    joint_pos = []
+            joint_name_lst.append(joint_name.decode("utf-8"))        
     for i in range(len(joint_ids)):
-        joint_state = p.getJointState(kuka_id, joint_ids[i])
-        joint_pos.append(joint_state[0])
+        param_ids.append(p.addUserDebugParameter(joint_name_lst[i], -4, 4, origin_joint[i]))
     
+    # get joint state
+    joint_state = []
+    for i in range(len(joint_ids)):
+        joint_pos = p.getJointState(kuka_id, joint_ids[i])
+        joint_state.append(joint_pos[0])
     
-    # rospy.init_node("replay_node")
-    # bridge = CvBridge()
-    # img_left_publisher = rospy.Publisher(args.img_left_topic, Image, queue_size=10)
-    # img_right_publisher = rospy.Publisher(args.img_right_topic, Image, queue_size=10)
-    # img_front_publisher = rospy.Publisher(args.img_front_topic, Image, queue_size=10)
-    
-    # puppet_arm_left_publisher = rospy.Publisher(args.puppet_arm_left_topic, JointState, queue_size=10)
-    # puppet_arm_right_publisher = rospy.Publisher(args.puppet_arm_right_topic, JointState, queue_size=10)
-    
-    # master_arm_left_publisher = rospy.Publisher(args.master_arm_left_topic, JointState, queue_size=10)
-    # master_arm_right_publisher = rospy.Publisher(args.master_arm_right_topic, JointState, queue_size=10)
-    
-    # robot_base_publisher = rospy.Publisher(args.robot_base_topic, Twist, queue_size=10)
-    
-    # origin_right = [ 0.0616, 0.0021, 0.0475, -0.1013, 0.1097, 0.0872, 0.2279]
-    
-    env = KukaIrEnv(renders=True, isDiscrete=True)
-    env.reset()
-    
-    
-    joint_state_msg = JointState()
-    joint_state_msg.header =  Header()
-    joint_state_msg.name = ['joint0', 'joint1', 'joint2', 'joint3', 'joint4', 'joint5', 'joint6']  # 设置关节名称
-    twist_msg = Twist()
-
-    rate = rospy.Rate(args.frame_rate)
-    
-    qposs, qvels, efforts, actions, base_actions, image_dicts = load_hdf5(os.path.join(dataset_dir, task_name), dataset_name)
-    
-    
-    if args.only_pub_master:
-        last_action = [-0.0057,-0.031, -0.0122, -0.032, 0.0099, 0.0179, 0.2279, 0.0616, 0.0021, 0.0475, -0.1013, 0.1097, 0.0872, 0.2279]
-        rate = rospy.Rate(100)
-        for action in actions:
-            if(rospy.is_shutdown()):
-                    break
-            
-            new_actions = np.linspace(last_action, action, 20) # 插值
-            last_action = action
-            for act in new_actions:
-                print(np.round(act[:7], 4))
-                cur_timestamp = rospy.Time.now()  # 设置时间戳
-                joint_state_msg.header.stamp = cur_timestamp 
-                
-                joint_state_msg.position = act[:7]
-                master_arm_left_publisher.publish(joint_state_msg)
-
-                joint_state_msg.position = act[7:]
-                master_arm_right_publisher.publish(joint_state_msg)   
-
-                if(rospy.is_shutdown()):
-                    break
-                rate.sleep() 
-    
-    else:
-        i = 0
-        while(not rospy.is_shutdown() and i < len(actions)):
-            print("left: ", np.round(qposs[i][:7], 4), " right: ", np.round(qposs[i][7:], 4))
-            
-            cam_names = [k for k in image_dicts.keys()]
-            image0 = image_dicts[cam_names[0]][i] 
-            image0 = image0[:, :, [2, 1, 0]]  # swap B and R channel
-        
-            image1 = image_dicts[cam_names[1]][i] 
-            image1 = image1[:, :, [2, 1, 0]]  # swap B and R channel
-            
-            image2 = image_dicts[cam_names[2]][i] 
-            image2 = image2[:, :, [2, 1, 0]]  # swap B and R channel
-
-            cur_timestamp = rospy.Time.now()  # 设置时间戳
-            
-            joint_state_msg.header.stamp = cur_timestamp 
-            joint_state_msg.position = actions[i][:7]
-            master_arm_left_publisher.publish(joint_state_msg)
-
-            joint_state_msg.position = actions[i][7:]
-            master_arm_right_publisher.publish(joint_state_msg)
-
-            joint_state_msg.position = qposs[i][:7]
-            puppet_arm_left_publisher.publish(joint_state_msg)
-
-            joint_state_msg.position = qposs[i][7:]
-            puppet_arm_right_publisher.publish(joint_state_msg)
-
-            img_front_publisher.publish(bridge.cv2_to_imgmsg(image0, "bgr8"))
-            img_left_publisher.publish(bridge.cv2_to_imgmsg(image1, "bgr8"))
-            img_right_publisher.publish(bridge.cv2_to_imgmsg(image2, "bgr8"))
-    
-            
-            twist_msg.linear.x = base_actions[i][0]
-            twist_msg.angular.z = base_actions[i][1]
-            robot_base_publisher.publish(twist_msg)
-
-            i += 1
-            rate.sleep() 
-            
+    data = load_hdf5(os.path.join(dataset_dir, task_name), dataset_name) 
+    actions = data[3]
+    last_action = origin_joint
+    time_steps = 0
+    p.setRealTimeSimulation(1)
+    print("=== start simulation ===")
+    for action in actions:
+        print(f"Time Steps: {time_steps}")
+        new_actions = np.linspace(last_action, action, 20)
+        last_action = action
+        for new_act in new_actions:
+            for i in range(len(new_act)):
+                p.setJointMotorControl2(kuka_id, joint_ids[i], p.POSITION_CONTROL, new_act[i], force=200)
+            last_action = new_act
+        time_steps += 1
+        time.sleep(0.05)
+    print("Success!")
+    time.sleep(5)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset_dir', action='store', type=str, help='Dataset dir.', required=True)
+    parser.add_argument('--dataset_dir', action='store', type=str, help='Dataset dir.', default="./datasets", required=False)
     parser.add_argument('--task_name', action='store', type=str, help='Task name.',
                         default="project_test", required=False)
 
@@ -237,36 +118,11 @@ if __name__ == '__main__':
     
     parser.add_argument('--camera_names', action='store', type=str, help='camera_names',
                         default=['cam_top', 'cam_hand'], required=False)
-    
-    # parser.add_argument('--img_front_topic', action='store', type=str, help='img_front_topic',
-    #                     default='/camera_f/color/image_raw', required=False)
-    # parser.add_argument('--img_left_topic', action='store', type=str, help='img_left_topic',
-    #                     default='/camera_l/color/image_raw', required=False)
-    # parser.add_argument('--img_right_topic', action='store', type=str, help='img_right_topic',
-    #                     default='/camera_r/color/image_raw', required=False)
-    
-    # parser.add_argument('--master_arm_left_topic', action='store', type=str, help='master_arm_left_topic',
-    #                     default='/master/joint_left', required=False)
-    # parser.add_argument('--master_arm_right_topic', action='store', type=str, help='master_arm_right_topic',
-    #                     default='/master/joint_right', required=False)
-    
-    # parser.add_argument('--puppet_arm_left_topic', action='store', type=str, help='puppet_arm_left_topic',
-    #                     default='/puppet/joint_left', required=False)
-    # parser.add_argument('--puppet_arm_right_topic', action='store', type=str, help='puppet_arm_right_topic',
-    #                     default='/puppet/joint_right', required=False)
-    
-    # parser.add_argument('--robot_base_topic', action='store', type=str, help='robot_base_topic',
-    #                     default='/cmd_vel', required=False)
+
     parser.add_argument('--use_robot_base', action='store', type=bool, help='use_robot_base',
                         default=False, required=False)
     
-    # parser.add_argument('--frame_rate', action='store', type=int, help='frame_rate',
-    #                     default=30, required=False)
-    
-    # parser.add_argument('--only_pub_master', action='store_true', help='only_pub_master',required=False)
-    
-    
-
     args = parser.parse_args()
     main(args)
-    # python collect_data.py --max_timesteps 500 --is_compress --episode_idx 0 
+    
+# python collect_data/replay_data.py --task_name "project_test" --episode_idx 0 

@@ -78,7 +78,7 @@ def save_videos(video, actions, dt, video_path=None):
     out = cv2.VideoWriter(video_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
     for t in range(n_frames):
         image = all_cam_videos[t]
-        image = image[:, :, [2, 1, 0]]  # swap B and R channel
+        # image = image[:, :, [2, 1, 0]]  # swap B and R channel
         cv2.imshow("images",image)
         cv2.waitKey(30)
         print("episode_id: ", t, "left: ", np.round(actions[t][:7], 3), "right: ", np.round(actions[t][7:], 3), "\n")
@@ -151,9 +151,10 @@ def visualize_base(readings, plot_path=None):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset_dir', action='store', type=str, help='Dataset dir.', required=True)
-    parser.add_argument('--task_name', action='store', type=str, help='Task name.',
-                        default="aloha_mobile_dummy", required=False)
+    parser.add_argument('--dataset_dir', action='store', type=str, help='Dataset dir.', default="./datasets", required=False)
+    parser.add_argument('--task_name', action='store', type=str, help='Task name.', default="project_test", required=False)
     parser.add_argument('--episode_idx', action='store', type=int, help='Episode index.',default=0, required=False)
     
     main(vars(parser.parse_args()))
+
+# python collect_data/visualize_episodes.py --task_name "project_test" --episode_idx 0 

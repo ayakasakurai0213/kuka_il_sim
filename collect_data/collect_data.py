@@ -1,8 +1,10 @@
 import os
 import sys
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+print(base_dir)
 sys.path.append(base_dir)
 import time
+import threading
 import numpy as np
 import h5py
 import argparse
@@ -11,6 +13,7 @@ import collections
 import cv2
 import pybullet as p
 from env.kuka_ir_env import KukaIrEnv
+from keybord_control import Keyboard
 
 
 def save_data(args, timesteps, actions, dataset_path):
@@ -119,11 +122,11 @@ class KukaOperator:
         return joint_pos
     
     
-    def control_pos(self):
-        for i in range(len(self.param_ids)):
-            target_joint = p.readUserDebugParameter(self.param_ids[i])
-            p.setJointMotorControl2(self.kuka_id, self.joint_ids[i], p.POSITION_CONTROL, target_joint, force=5 * 240.)
-        time.sleep(0.01)
+    # def control_pos(self):
+    #     for i in range(len(self.param_ids)):
+    #         target_joint = p.readUserDebugParameter(self.param_ids[i])
+    #         p.setJointMotorControl2(self.kuka_id, self.joint_ids[i], p.POSITION_CONTROL, target_joint, force=5 * 240.)
+    #     time.sleep(0.01)
     
     
     def get_top_img(self):
@@ -138,7 +141,7 @@ class KukaOperator:
 
 
     def get_frame(self):
-        self.control_pos()
+        # self.control_pos()
         img_top, img_top_depth = self.get_top_img()
         # print("img_top:", img_top.shape)
         img_hand, img_hand_depth = self.get_hand_img()
@@ -156,6 +159,9 @@ class KukaOperator:
 
 
     def process(self):
+        keyboard = Keyboard()
+        thread = threading.Thread(target=keyboard.control_key, name="keyboard_thread", daemon=True)
+        thread.start()
         timesteps = []
         actions = []
         # image data
@@ -168,7 +174,8 @@ class KukaOperator:
         print_flag = True
 
         while count < self.args.max_timesteps + 1:
-            # collecting image data
+            self.env.arm_control(keyboard.action)
+            # collecting image and joint data
             result = self.get_frame()
             if not result:
                 if print_flag:
@@ -276,4 +283,4 @@ def main():
 if __name__ == '__main__':
     main()
 
-# python collect_data.py --dataset_dir ./datasets --max_timesteps 500 --task_name "project_test" --episode_idx 0
+# python collect_data/collect_data.py --dataset_dir ./datasets --max_timesteps 500 --task_name "project_test" --episode_idx 0

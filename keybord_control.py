@@ -11,6 +11,8 @@ class Keyboard:
         pygame.display.set_caption("keyboard event")
         
         self.font = pygame.font.Font(None, 50)
+        self.action = []
+        self.text = 0
         
     def update(self, text):
         self.screen.fill((0, 0, 0))
@@ -57,12 +59,15 @@ class Keyboard:
             action.append(0)
         text = self.font.render(f"pressed key: {action}", True, (255, 255, 255))
         return action, text
+    
+    def control_key(self):
+        while True:
+            self.action, self.text = self.get_pressed_key()
+            self.update(self.text)
             
 def main():
     keyboard = Keyboard()
-    while True:
-        action, text = keyboard.get_pressed_key()
-        keyboard.update(text)
+    keyboard.control_key()
     
     
 if __name__ == "__main__":

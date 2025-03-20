@@ -1,7 +1,9 @@
 import os
 root_dir = os.path.dirname(os.path.abspath(__file__))
 import cv2
+import torch
 import pybullet as p
+import threading
 import time
 from env.kuka_ir_env import KukaIrEnv
 
@@ -9,12 +11,13 @@ from keybord_control import Keyboard
 
 
 class Kuka_sim:
-    def __init__(self, env):
+    def __init__(self, env, device):
         self.env = env
         self.kuka_id = self.env._kuka.kukaUid
+        self.device = device
         self.init_pos()
-     
-   
+    
+    
     def init_pos(self):
         self.joint_ids = []     # 0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 13
         self.param_ids = []
@@ -65,36 +68,39 @@ class Kuka_sim:
             count += 1
         return
     
-    def get_screen(self):
-        screen = self.env._get_observation()[0]  
-        img = cv2.cvtColor(screen, cv2.COLOR_RGB2BGR)
-        cv2.imwrite("images/test.jpg", img)      
-        return img
+    def get_top_img(self):
+        screen = self.env._get_observation()[0]
+        top_img = cv2.cvtColor(screen, cv2.COLOR_RGB2BGR)
+        cv2.imwrite("images/test1.jpg", top_img)
+        return top_img
     
     def get_hand_img(self):
         screen = self.env._get_hand_cam()[0]
-        img = cv2.cvtColor(screen, cv2.COLOR_RGB2BGR)
-        cv2.imwrite("images/test2.jpg", img)
-        return img
+        hand_img = cv2.cvtColor(screen, cv2.COLOR_RGB2BGR)
+        cv2.imwrite("images/test2.jpg", hand_img)
+        return hand_img
     
 
 def main():
     env = KukaIrEnv(renders=True, isDiscrete=True)
     env.reset()
-    kuka_sim = Kuka_sim(env)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    kuka_sim = Kuka_sim(env, device)
     keyboard = Keyboard()
+    thread = threading.Thread(target=keyboard.control_key, name="keyboard_thread", daemon=True)
+    thread.start()
+    # joint_pos = kuka_sim.get_joint()
+    # print(joint_pos)
     
     p.setRealTimeSimulation(1)
     while True:
         # kuka_sim.control_pos()
         env.reset()
-        # kuka_sim.get_screen()
-        # kuka_sim.get_hand_img()
         for i in range(1000):
             # キーボードまたはゲームパッド入力取得
-            action, text = keyboard.get_pressed_key()
-            keyboard.update(text)
-            env.arm_control(action)
+            # kuka_sim.get_screen()
+            # kuka_sim.get_hand_img()
+            env.arm_control(keyboard.action)
         
 
 if __name__ == "__main__": 
