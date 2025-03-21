@@ -89,7 +89,7 @@ class KukaIrEnv(KukaGymEnv):
       self.cid = p.connect(p.SHARED_MEMORY)
       if (self.cid < 0):
         self.cid = p.connect(p.GUI)
-      p.resetDebugVisualizerCamera(1.3, 180, -41, [0.52, -0.2, -0.33], 0)
+      p.resetDebugVisualizerCamera(1.3, 180, -50, [0.52, -0.2, -0.33], 0)
     else:
       self.cid = p.connect(p.DIRECT)
     self.seed()
@@ -222,7 +222,7 @@ class KukaIrEnv(KukaGymEnv):
     0: stay, 1: right, 2: left, 3: front, 4: back, 5: down, 6: up, 
     7: gripper CW, 8: gripper semi-CW, 9: gripper close
     """
-    dv = 0.01
+    dv = 0.003
     dx, dy, dz, da = 0, 0, 0, 0
     
     for idx in range(9):
@@ -230,7 +230,7 @@ class KukaIrEnv(KukaGymEnv):
         dx += [0, -dv, dv, 0, 0, 0, 0, 0, 0][idx]
         dy += [0, 0, 0, -dv, dv, 0, 0, 0, 0][idx]
         dz += [0, 0, 0, 0, 0, -dv, dv, 0, 0][idx]
-        da += [0, 0, 0, 0, 0, 0, 0, -0.25, 0.25][idx]
+        da += [0, 0, 0, 0, 0, 0, 0, -0.10, 0.10][idx]
     
     action = [dx, dy, dz, da, self.finger_angle]
     

@@ -8,8 +8,12 @@ import matplotlib.pyplot as plt
 
 DT = 0.02
 # JOINT_NAMES = ["waist", "shoulder", "elbow", "forearm_roll", "wrist_angle", "wrist_rotate"]
-JOINT_NAMES = ["joint0", "joint1", "joint2", "joint3", "joint4", "joint5"]
-STATE_NAMES = JOINT_NAMES + ["gripper"]
+# JOINT_NAMES = ["joint0", "joint1", "joint2", "joint3", "joint4", "joint5"]
+STATE_NAMES = [
+    'J0', 'J1', 'J2', 'J3', 'J4', 'J5', 'J6', 'gripper_to_arm', 'base_left_finger_joint', 
+    'left_base_tip_joint', 'base_right_finger_joint', 'right_base_tip_joint'
+    ]
+# STATE_NAMES = JOINT_NAMES + ["gripper"]
 BASE_STATE_NAMES = ["linear_vel", "angular_vel"]
 
 def load_hdf5(dataset_dir, dataset_name):
@@ -102,7 +106,8 @@ def visualize_joints(qpos_list, command_list, plot_path=None, ylim=None, label_o
     fig, axs = plt.subplots(num_figs, 1, figsize=(8, 2 * num_dim))
 
     # plot joint state
-    all_names = [name + '_left' for name in STATE_NAMES] + [name + '_right' for name in STATE_NAMES]
+    # all_names = [name + '_left' for name in STATE_NAMES] + [name + '_right' for name in STATE_NAMES]
+    all_names = STATE_NAMES
     for dim_idx in range(num_dim):
         ax = axs[dim_idx]
         ax.plot(qpos[:, dim_idx], label=label1, color='orangered')

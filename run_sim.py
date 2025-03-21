@@ -82,7 +82,7 @@ class Kuka_sim:
     
 
 def main():
-    env = KukaIrEnv(renders=True, isDiscrete=True)
+    env = KukaIrEnv(renders=True, isDiscrete=True, numObjects=1)
     env.reset()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     kuka_sim = Kuka_sim(env, device)
@@ -98,8 +98,8 @@ def main():
         env.reset()
         for i in range(1000):
             # キーボードまたはゲームパッド入力取得
-            # kuka_sim.get_screen()
-            # kuka_sim.get_hand_img()
+            kuka_sim.get_top_img()
+            kuka_sim.get_hand_img()
             env.arm_control(keyboard.action)
         
 

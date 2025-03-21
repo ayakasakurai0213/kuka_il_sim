@@ -63,7 +63,7 @@ class Kuka:
                               targetPosition=self.jointPositions[jointIndex],
                               force=self.maxForce)
 
-    self.trayUid = p.loadURDF(os.path.join(self.urdfRootPath, "tray/tray.urdf"), 0.640000,
+    self.trayUid = p.loadURDF(os.path.join(self.urdfRootPath, "tray/tray.urdf"), 0.540000,
                               0.075000, -0.190000, 0.000000, 0.000000, 1.000000, 0.000000)
     self.endEffectorPos = [0.537, 0.0, 0.5]
     self.endEffectorAngle = 0
