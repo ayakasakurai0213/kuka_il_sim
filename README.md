@@ -1,10 +1,26 @@
 # Kuka-Ir-sim
 ## 概要
-pybulletの環境で模倣学習のシミュレーションを実装しました。kuka
+pybulletの環境で模倣学習を実装しました．kuka iiwaロボットのシミュレータを使用して，マニピュレーション動作のデータ収集，学習，推論を行うことができます．シミュレーションできる模倣学習の手法にはALOHAの研究でも使われた，ACT(Action Chunking with Transformer)があります．ACTの詳細は以下の論文を参照してください（URL）．また，このシミュレーションは以下のソースコードを参考にしています（URL）．
 
 ## インストール
+このシミュレータを実行するためには以下の手順に従って環境を構築してください．
+### ワークスペースの作成
+好きな場所に新しいディレクトリを作成し，その中にこのシミュレータのリポジトリをcloneしてください．
+```
+mkdir ~/ir_ws
+cd ~/ir_ws
+git clone git@github.com:ayakasakurai0213/kuka_ir_sim.git
+```
+### 仮想環境の構築
+以下のコマンドを実行してcondaの仮想環境を構築してください．
+```
 conda create --name ir_sim python=3.10
-pip install -r requirements.txt
+```
+### パッケージインストール
+上記で建てた仮想環境の中で以下のコマンドを実行し，必要なパッケージをインストールしてください．
+```
+./install.sh
+```
 
 ## 使い方
 ### データ収集
