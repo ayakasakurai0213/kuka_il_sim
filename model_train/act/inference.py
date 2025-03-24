@@ -1,11 +1,6 @@
-#!/home/lin/software/miniconda3/envs/aloha/bin/python
-# -- coding: UTF-8
 """
 #!/usr/bin/python3
 """
-
-import torch
-import numpy as np
 import os
 import sys
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -18,13 +13,10 @@ from einops import rearrange
 from utils import compute_dict_mean, set_seed, detach_dict # helper functions
 from policy import ACTPolicy, CNNMLPPolicy, DiffusionPolicy
 import collections
-from collections import deque
+# from collections import deque
 
-# import rospy
-# from std_msgs.msg import Header
-# from geometry_msgs.msg import Twist
-# from sensor_msgs.msg import JointState, Image
-# from nav_msgs.msg import Odometry
+import torch
+import numpy as np
 import cv2
 # from cv_bridge import CvBridge
 import time
@@ -119,7 +111,6 @@ def get_model_config(args):
                          'use_depth_image': args.use_depth_image,
                          'use_robot_base': args.use_robot_base
                          }
-
     elif args.policy_class == 'Diffusion':
         policy_config = {'lr': args.lr,
                          'lr_backbone': args.lr_backbone,
@@ -188,13 +179,10 @@ def get_depth_image(observation, camera_names):
 
 
 def inference_process(args, config, kuka_operator, policy, stats, t, pre_action):
-    global inference_lock
-    global inference_actions
-    global inference_timestep
+    global inference_lock, inference_actions, inference_timestep
     print_flag = True
     pre_pos_process = lambda s_qpos: (s_qpos - stats['qpos_mean']) / stats['qpos_std']
     pre_action_process = lambda next_action: (next_action - stats["action_mean"]) / stats["action_std"]
-    # rate = rospy.Rate(args.publish_rate)
     while True:
         result = kuka_operator.get_frame()
         if not result:
@@ -207,19 +195,14 @@ def inference_process(args, config, kuka_operator, policy, stats, t, pre_action)
         (img_top, img_hand, img_top_depth, img_hand_depth, arm_joint, robot_base) = result
         obs = collections.OrderedDict()
         image_dict = dict()
-
         image_dict[config['camera_names'][0]] = img_top
         image_dict[config['camera_names'][1]] = img_hand
-        # image_dict[config['camera_names'][2]] = img_right
-
-
         obs['images'] = image_dict
-
+        
         if args.use_depth_image:
             image_depth_dict = dict()
             image_depth_dict[config['camera_names'][0]] = img_top_depth
             image_depth_dict[config['camera_names'][1]] = img_hand_depth
-            # image_depth_dict[config['camera_names'][2]] = img_right_depth
             obs['images_depth'] = image_depth_dict
 
         obs['qpos'] = arm_joint['qpos']
@@ -230,7 +213,6 @@ def inference_process(args, config, kuka_operator, policy, stats, t, pre_action)
             obs['qpos'] = np.concatenate((obs['qpos'], obs['base_vel']), axis=0)
         else:
             obs['base_vel'] = [0.0, 0.0]
-        # qpos_numpy = np.array(obs['qpos'])
 
         # 归一化处理qpos 并转到cuda
         qpos = pre_pos_process(obs['qpos'])
@@ -248,7 +230,6 @@ def inference_process(args, config, kuka_operator, policy, stats, t, pre_action)
         inference_actions = all_actions.cpu().detach().numpy()
         if pre_action is None:
             pre_action = obs['qpos']
-        # print("obs['qpos']:", obs['qpos'][7:])
         if args.use_actions_interpolation:
             inference_actions = actions_interpolation(args, pre_action, inference_actions, stats)
         inference_timestep = t
@@ -257,10 +238,7 @@ def inference_process(args, config, kuka_operator, policy, stats, t, pre_action)
 
 
 def model_inference(args, config, kuka_operator, save_episode=True):
-    global inference_lock
-    global inference_actions
-    global inference_timestep
-    global inference_thread
+    global inference_lock, inference_actions, inference_timestep, inference_thread
     set_seed(1000)
 
     # 1 创建模型数据  继承nn.Module
@@ -300,7 +278,7 @@ def model_inference(args, config, kuka_operator, save_episode=True):
     chunk_size = config['policy_config']['chunk_size']
 
     # ros_operator.puppet_arm_publish_continuous(left0, right0)
-    input("Enter any key to continue :")
+    # input("Enter any key to continue :")
     # ros_operator.puppet_arm_publish_continuous(left1, right1)
     action = None
     # 推理
@@ -348,8 +326,6 @@ def model_inference(args, config, kuka_operator, save_episode=True):
                 else:
                     raise NotImplementedError
                 action = post_process(raw_action[0])
-                # left_action = action[:7]  # 取7维度
-                # right_action = action[7:14]
                 kuka_operator.control_pos(action)
                 # ros_operator.puppet_arm_publish(left_action, right_action)  # puppet_arm_publish_continuous_thread
                 if args.use_robot_base:
