@@ -11,10 +11,10 @@ from keybord_control import Keyboard
 
 
 class Kuka_sim:
-    def __init__(self, env, device):
+    def __init__(self, env):
         self.env = env
         self.kuka_id = self.env._kuka.kukaUid
-        self.device = device
+        # self.device = device
         self.init_pos()
     
     
@@ -68,6 +68,13 @@ class Kuka_sim:
             count += 1
         return
     
+    def control_key(self):
+        keyboard = Keyboard()
+        while True:
+            keyboard.action, keyboard.text = keyboard.get_pressed_key()
+            keyboard.update(keyboard.text)
+            self.env.arm_control(keyboard.action)
+    
     def get_top_img(self):
         screen = self.env._get_observation()[0]
         top_img = cv2.cvtColor(screen, cv2.COLOR_RGB2BGR)
@@ -84,10 +91,9 @@ class Kuka_sim:
 def main():
     env = KukaIrEnv(renders=True, isDiscrete=True, numObjects=1)
     env.reset()
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    kuka_sim = Kuka_sim(env, device)
-    keyboard = Keyboard()
-    thread = threading.Thread(target=keyboard.control_key, name="keyboard_thread", daemon=True)
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    kuka_sim = Kuka_sim(env)
+    thread = threading.Thread(target=kuka_sim.control_key, name="keyboard_thread", daemon=True)
     thread.start()
     # joint_pos = kuka_sim.get_joint()
     # print(joint_pos)
@@ -100,7 +106,6 @@ def main():
             # キーボードまたはゲームパッド入力取得
             kuka_sim.get_top_img()
             kuka_sim.get_hand_img()
-            env.arm_control(keyboard.action)
         
 
 if __name__ == "__main__": 

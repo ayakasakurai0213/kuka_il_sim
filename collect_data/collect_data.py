@@ -84,6 +84,7 @@ class KukaOperator:
     def __init__(self, env, args):
         self.env = env
         self.kuka_id = self.env._kuka.kukaUid
+        self.keyboard = Keyboard()
         self.args = args
         self.init()
         
@@ -122,11 +123,11 @@ class KukaOperator:
         return joint_pos
     
     
-    # def control_pos(self):
-    #     for i in range(len(self.param_ids)):
-    #         target_joint = p.readUserDebugParameter(self.param_ids[i])
-    #         p.setJointMotorControl2(self.kuka_id, self.joint_ids[i], p.POSITION_CONTROL, target_joint, force=5 * 240.)
-    #     time.sleep(0.01)
+    def control_key(self):
+        while True:
+            self.keyboard.action, self.keyboard.text = self.keyboard.get_pressed_key()
+            self.keyboard.update(self.keyboard.text)
+            self.env.arm_control(self.keyboard.action)
     
     
     def get_top_img(self):
@@ -159,8 +160,7 @@ class KukaOperator:
 
 
     def process(self):
-        keyboard = Keyboard()
-        thread = threading.Thread(target=keyboard.control_key, name="keyboard_thread", daemon=True)
+        thread = threading.Thread(target=self.control_key, name="keyboard_thread", daemon=True)
         thread.start()
         timesteps = []
         actions = []
@@ -174,7 +174,7 @@ class KukaOperator:
         print_flag = True
 
         while count < self.args.max_timesteps + 1:
-            self.env.arm_control(keyboard.action)
+            self.env.arm_control(self.keyboard.action)
             # collecting image and joint data
             result = self.get_frame()
             if not result:
@@ -256,7 +256,7 @@ def get_arguments():
 
 
 def main():
-    env = KukaIrEnv(renders=True, isDiscrete=True)
+    env = KukaIrEnv(renders=True, isDiscrete=True, numObjects=1)
     env.reset()
     args = get_arguments()
     kuka_operator = KukaOperator(env, args)
