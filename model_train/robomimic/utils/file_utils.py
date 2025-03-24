@@ -13,12 +13,12 @@ from tqdm import tqdm
 
 import torch
 
-import robomimic.utils.obs_utils as ObsUtils
-import robomimic.utils.env_utils as EnvUtils
-import robomimic.utils.torch_utils as TorchUtils
-from robomimic.config import config_factory
-from robomimic.algo import algo_factory
-from robomimic.algo import RolloutPolicy
+import model_train.robomimic.utils.obs_utils as ObsUtils
+import model_train.robomimic.utils.env_utils as EnvUtils
+import model_train.robomimic.utils.torch_utils as TorchUtils
+from model_train.robomimic.config import config_factory
+from model_train.robomimic.algo import algo_factory
+from model_train.robomimic.algo import RolloutPolicy
 
 
 def create_hdf5_filter_key(hdf5_path, demo_keys, key_name):

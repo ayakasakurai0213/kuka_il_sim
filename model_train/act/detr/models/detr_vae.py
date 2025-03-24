@@ -2,6 +2,11 @@
 """
 DETR model and criterion classes.
 """
+import os
+import sys
+base_dir =os.path.abspath(os.getcwd())
+sys.path.append(base_dir)
+
 import torch
 from torch import nn
 from torch.autograd import Variable
@@ -10,10 +15,8 @@ from .transformer import build_transformer, TransformerEncoder, TransformerEncod
 
 import numpy as np
 from collections import OrderedDict
-import sys
-sys.path.append("./")
-from robomimic.models.base_nets import ResNet18Conv, SpatialSoftmax
-from robomimic.algo.diffusion_policy import replace_bn_with_gn, ConditionalUnet1D
+from model_train.robomimic.models.base_nets import ResNet18Conv, SpatialSoftmax
+from model_train.robomimic.algo.diffusion_policy import replace_bn_with_gn, ConditionalUnet1D
 
 from diffusers.schedulers.scheduling_ddpm import DDPMScheduler
 from diffusers.schedulers.scheduling_ddim import DDIMScheduler

@@ -10,11 +10,11 @@ from termcolor import colored
 import numpy as np
 import torch
 
-import robomimic
-import robomimic.utils.file_utils as FileUtils
-import robomimic.utils.torch_utils as TorchUtils
-from robomimic.config import Config, config_factory
-from robomimic.scripts.train import train
+import model_train.robomimic
+import model_train.robomimic.utils.file_utils as FileUtils
+import model_train.robomimic.utils.torch_utils as TorchUtils
+from model_train.robomimic.config import Config, config_factory
+from model_train.robomimic.scripts.train import train
 
 
 def maybe_remove_dir(dir_to_remove):

@@ -2,10 +2,10 @@
 Config for IRIS algorithm.
 """
 
-from robomimic.config.bcq_config import BCQConfig
-from robomimic.config.gl_config import GLConfig
-from robomimic.config.bc_config import BCConfig
-from robomimic.config.hbc_config import HBCConfig
+from model_train.robomimic.config.bcq_config import BCQConfig
+from model_train.robomimic.config.gl_config import GLConfig
+from model_train.robomimic.config.bc_config import BCConfig
+from model_train.robomimic.config.hbc_config import HBCConfig
 
 
 class IRISConfig(HBCConfig):

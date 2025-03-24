@@ -11,9 +11,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from robomimic.models.base_nets import Module
-import robomimic.utils.tensor_utils as TensorUtils
-import robomimic.utils.torch_utils as TorchUtils
+from model_train.robomimic.models.base_nets import Module
+import model_train.robomimic.utils.tensor_utils as TensorUtils
+import model_train.robomimic.utils.torch_utils as TorchUtils
 
 class GEGLU(nn.Module):
     """

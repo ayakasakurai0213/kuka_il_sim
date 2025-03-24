@@ -3,6 +3,10 @@ Contains torch Modules for core observation processing blocks
 such as encoders (e.g. EncoderCore, VisualCore, ScanCore, ...)
 and randomizers (e.g. Randomizer, CropRandomizer).
 """
+import os
+import sys
+base_dir =os.path.abspath(os.getcwd())
+sys.path.append(base_dir)
 
 import abc
 import numpy as np
@@ -12,15 +16,15 @@ import random
 import torch
 import torch.nn as nn
 
-import robomimic.models.base_nets as BaseNets
-import robomimic.utils.tensor_utils as TensorUtils
-import robomimic.utils.obs_utils as ObsUtils
-from robomimic.utils.python_utils import extract_class_init_kwargs_from_dict
+import model_train.robomimic.models.base_nets as BaseNets
+import model_train.robomimic.utils.tensor_utils as TensorUtils
+import model_train.robomimic.utils.obs_utils as ObsUtils
+from model_train.robomimic.utils.python_utils import extract_class_init_kwargs_from_dict
 
 # NOTE: this is required for the backbone classes to be found by the `eval` call in the core networks
-from robomimic.models.base_nets import *
-from robomimic.utils.vis_utils import visualize_image_randomizer
-from robomimic.macros import VISUALIZE_RANDOMIZER
+from model_train.robomimic.models.base_nets import *
+from model_train.robomimic.utils.vis_utils import visualize_image_randomizer
+from model_train.robomimic.macros import VISUALIZE_RANDOMIZER
 
 import torchvision.transforms.functional as TVF
 from torchvision.transforms import Lambda, Compose

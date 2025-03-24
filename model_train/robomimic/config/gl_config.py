@@ -3,7 +3,7 @@ Config for Goal Learning (sub-algorithm used by hierarchical models like HBC and
 This class of model predicts (or samples) subgoal observations given a current observation.
 """
 
-from robomimic.config.base_config import BaseConfig
+from model_train.robomimic.config.base_config import BaseConfig
 
 
 class GLConfig(BaseConfig):

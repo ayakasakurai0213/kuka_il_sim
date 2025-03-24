@@ -5,8 +5,8 @@ when new config options are added, or when default settings in the config classe
 import os
 import json
 
-import robomimic
-from robomimic.config import get_all_registered_configs
+import model_train.robomimic
+from model_train.robomimic.config import get_all_registered_configs
 
 
 def main():

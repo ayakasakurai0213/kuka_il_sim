@@ -9,7 +9,7 @@ from collections import OrderedDict
 import torch
 import torch.nn.functional as F
 
-import robomimic.utils.tensor_utils as TU
+import model_train.robomimic.utils.tensor_utils as TU
 
 # MACRO FOR VALID IMAGE CHANNEL SIZES
 VALID_IMAGE_CHANNEL_DIMS = {1, 3}       # depth, rgb

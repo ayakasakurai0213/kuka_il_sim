@@ -7,10 +7,10 @@ from copy import deepcopy
 
 import torch
 
-import robomimic.utils.tensor_utils as TensorUtils
-import robomimic.utils.obs_utils as ObsUtils
-from robomimic.config.config import Config
-from robomimic.algo import register_algo_factory_func, algo_name_to_factory_func, HBC, ValuePlanner, ValueAlgo, GL_VAE
+import model_train.robomimic.utils.tensor_utils as TensorUtils
+import model_train.robomimic.utils.obs_utils as ObsUtils
+from model_train.robomimic.config.config import Config
+from model_train.robomimic.algo import register_algo_factory_func, algo_name_to_factory_func, HBC, ValuePlanner, ValueAlgo, GL_VAE
 
 
 @register_algo_factory_func("iris")

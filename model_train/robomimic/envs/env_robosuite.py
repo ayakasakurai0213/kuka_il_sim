@@ -9,9 +9,9 @@ from copy import deepcopy
 
 import robosuite
 
-import robomimic.utils.obs_utils as ObsUtils
-import robomimic.utils.lang_utils as LangUtils
-import robomimic.envs.env_base as EB
+import model_train.robomimic.utils.obs_utils as ObsUtils
+import model_train.robomimic.utils.lang_utils as LangUtils
+import model_train.robomimic.envs.env_base as EB
 
 
 class EnvRobosuite(EB.EnvBase):

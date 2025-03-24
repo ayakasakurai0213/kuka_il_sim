@@ -20,11 +20,11 @@ import h5py
 import json
 import argparse
 
-import robomimic.envs.env_base as EB
-from robomimic.scripts.split_train_val import split_train_val_from_hdf5
-from robomimic.scripts.conversion.robosuite_add_absolute_actions import add_absolute_actions_to_dataset
-from robomimic.scripts.conversion.extract_action_dict import extract_action_dict
-from robomimic.scripts.filter_dataset_size import filter_dataset_size
+import model_train.robomimic.envs.env_base as EB
+from model_train.robomimic.scripts.split_train_val import split_train_val_from_hdf5
+from model_train.robomimic.scripts.conversion.robosuite_add_absolute_actions import add_absolute_actions_to_dataset
+from model_train.robomimic.scripts.conversion.extract_action_dict import extract_action_dict
+from model_train.robomimic.scripts.filter_dataset_size import filter_dataset_size
 
 
 if __name__ == "__main__":

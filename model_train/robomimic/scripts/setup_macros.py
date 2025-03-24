@@ -9,11 +9,11 @@ If applicable, it creates the private macros at robomimic/macros_private.py
 """
 
 import os
-import robomimic
+import model_train.robomimic
 import shutil
 
 if __name__ == "__main__":
-    base_path = robomimic.__path__[0]
+    base_path = model_train.robomimic.__path__[0]
     macros_path = os.path.join(base_path, "macros.py")
     macros_private_path = os.path.join(base_path, "macros_private.py")
 

@@ -10,12 +10,12 @@ import numpy as np
 import copy
 
 import h5py
-import robomimic.utils.obs_utils as ObsUtils
-import robomimic.utils.file_utils as FileUtils
-import robomimic.utils.env_utils as EnvUtils
+import model_train.robomimic.utils.obs_utils as ObsUtils
+import model_train.robomimic.utils.file_utils as FileUtils
+import model_train.robomimic.utils.env_utils as EnvUtils
 from scipy.spatial.transform import Rotation
 
-from robomimic.config import config_factory
+from model_train.robomimic.config import config_factory
 
 """
 copied/adapted from https://github.com/columbia-ai-robotics/diffusion_policy/blob/main/diffusion_policy/common/robomimic_util.py

@@ -2,7 +2,7 @@
 Config for TD3_BC.
 """
 
-from robomimic.config.base_config import BaseConfig
+from model_train.robomimic.config.base_config import BaseConfig
 
 
 class TD3_BCConfig(BaseConfig):

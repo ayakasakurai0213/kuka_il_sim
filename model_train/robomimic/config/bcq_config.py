@@ -2,8 +2,8 @@
 Config for BCQ algorithm.
 """
 
-from robomimic.config.base_config import BaseConfig
-from robomimic.config.bc_config import BCConfig
+from model_train.robomimic.config.base_config import BaseConfig
+from model_train.robomimic.config.bc_config import BCConfig
 
 
 class BCQConfig(BaseConfig):

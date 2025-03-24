@@ -60,14 +60,14 @@ from copy import deepcopy
 
 import torch
 
-import robomimic
-import robomimic.utils.file_utils as FileUtils
-import robomimic.utils.torch_utils as TorchUtils
-import robomimic.utils.tensor_utils as TensorUtils
-import robomimic.utils.obs_utils as ObsUtils
-from robomimic.envs.env_base import EnvBase
-from robomimic.envs.wrappers import EnvWrapper
-from robomimic.algo import RolloutPolicy
+import model_train.robomimic
+import model_train.robomimic.utils.file_utils as FileUtils
+import model_train.robomimic.utils.torch_utils as TorchUtils
+import model_train.robomimic.utils.tensor_utils as TensorUtils
+import model_train.robomimic.utils.obs_utils as ObsUtils
+from model_train.robomimic.envs.env_base import EnvBase
+from model_train.robomimic.envs.wrappers import EnvWrapper
+from model_train.robomimic.algo import RolloutPolicy
 
 
 def rollout(policy, env, horizon, render=False, video_writer=None, video_skip=5, return_obs=False, camera_names=None):

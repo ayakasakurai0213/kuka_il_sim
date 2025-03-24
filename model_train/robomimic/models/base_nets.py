@@ -15,7 +15,7 @@ import torch.nn.functional as F
 from torchvision import models as vision_models
 from torchvision import transforms
 
-import robomimic.utils.tensor_utils as TensorUtils
+import model_train.robomimic.utils.tensor_utils as TensorUtils
 
 CONV_ACTIVATIONS = {
     "relu": nn.ReLU,

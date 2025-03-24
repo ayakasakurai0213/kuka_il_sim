@@ -8,13 +8,13 @@ from copy import deepcopy
 import torch
 import torch.nn as nn
 
-import robomimic.models.obs_nets as ObsNets
-import robomimic.models.vae_nets as VAENets
-import robomimic.utils.tensor_utils as TensorUtils
-import robomimic.utils.torch_utils as TorchUtils
-import robomimic.utils.obs_utils as ObsUtils
+import model_train.robomimic.models.obs_nets as ObsNets
+import model_train.robomimic.models.vae_nets as VAENets
+import model_train.robomimic.utils.tensor_utils as TensorUtils
+import model_train.robomimic.utils.torch_utils as TorchUtils
+import model_train.robomimic.utils.obs_utils as ObsUtils
 
-from robomimic.algo import register_algo_factory_func, PlannerAlgo, ValueAlgo
+from model_train.robomimic.algo import register_algo_factory_func, PlannerAlgo, ValueAlgo
 
 
 @register_algo_factory_func("gl")

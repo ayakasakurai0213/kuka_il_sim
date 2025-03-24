@@ -2,7 +2,7 @@
 Config for IQL algorithm.
 """
 
-from robomimic.config.base_config import BaseConfig
+from model_train.robomimic.config.base_config import BaseConfig
 
 
 class IQLConfig(BaseConfig):

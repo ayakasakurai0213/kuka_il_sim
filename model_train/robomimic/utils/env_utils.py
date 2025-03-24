@@ -4,8 +4,8 @@ wrappers provided by the repository, and with environment metadata saved
 in dataset files.
 """
 from copy import deepcopy
-import robomimic.envs.env_base as EB
-from robomimic.utils.log_utils import log_warning
+import model_train.robomimic.envs.env_base as EB
+from model_train.robomimic.utils.log_utils import log_warning
 
 
 def get_env_class(env_meta=None, env_type=None, env=None):
@@ -33,13 +33,13 @@ def get_env_class(env_meta=None, env_type=None, env=None):
     """
     env_type = get_env_type(env_meta=env_meta, env_type=env_type, env=env)
     if env_type == EB.EnvType.ROBOSUITE_TYPE:
-        from robomimic.envs.env_robosuite import EnvRobosuite
+        from model_train.robomimic.envs.env_robosuite import EnvRobosuite
         return EnvRobosuite
     elif env_type == EB.EnvType.GYM_TYPE:
-        from robomimic.envs.env_gym import EnvGym
+        from model_train.robomimic.envs.env_gym import EnvGym
         return EnvGym
     elif env_type == EB.EnvType.IG_MOMART_TYPE:
-        from robomimic.envs.env_ig_momart import EnvGibsonMOMART
+        from model_train.robomimic.envs.env_ig_momart import EnvGibsonMOMART
         return EnvGibsonMOMART
     raise Exception("code should never reach this point")
 
@@ -291,7 +291,7 @@ def wrap_env_from_config(env, config):
     to use (if any).
     """
     if config.train.frame_stack > 1:
-        from robomimic.envs.wrappers import FrameStackWrapper
+        from model_train.robomimic.envs.wrappers import FrameStackWrapper
         env = FrameStackWrapper(env, num_frames=config.train.frame_stack)
 
     return env

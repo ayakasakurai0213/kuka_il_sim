@@ -20,9 +20,9 @@ Example usage:
 """
 import os
 import argparse
-import robomimic
+import model_train.robomimic
 from robomimic import DATASET_REGISTRY
-from robomimic.config import Config, BCConfig, BCQConfig, CQLConfig, HBCConfig, IRISConfig, config_factory
+from model_train.robomimic.config import Config, BCConfig, BCQConfig, CQLConfig, HBCConfig, IRISConfig, config_factory
 
 
 def modify_config_for_default_low_dim_exp(config):

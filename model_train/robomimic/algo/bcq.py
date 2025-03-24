@@ -9,16 +9,16 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-import robomimic.models.obs_nets as ObsNets
-import robomimic.models.policy_nets as PolicyNets
-import robomimic.models.value_nets as ValueNets
-import robomimic.models.vae_nets as VAENets
-import robomimic.utils.tensor_utils as TensorUtils
-import robomimic.utils.torch_utils as TorchUtils
-import robomimic.utils.obs_utils as ObsUtils
-import robomimic.utils.loss_utils as LossUtils
+import model_train.robomimic.models.obs_nets as ObsNets
+import model_train.robomimic.models.policy_nets as PolicyNets
+import model_train.robomimic.models.value_nets as ValueNets
+import model_train.robomimic.models.vae_nets as VAENets
+import model_train.robomimic.utils.tensor_utils as TensorUtils
+import model_train.robomimic.utils.torch_utils as TorchUtils
+import model_train.robomimic.utils.obs_utils as ObsUtils
+import model_train.robomimic.utils.loss_utils as LossUtils
 
-from robomimic.algo import register_algo_factory_func, PolicyAlgo, ValueAlgo
+from model_train.robomimic.algo import register_algo_factory_func, PolicyAlgo, ValueAlgo
 
 
 @register_algo_factory_func("bcq")

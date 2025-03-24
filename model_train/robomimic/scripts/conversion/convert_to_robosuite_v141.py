@@ -6,9 +6,9 @@ from shutil import copyfile
 import robosuite
 import xml.etree.ElementTree as ET
 
-import robomimic.utils.obs_utils as ObsUtils
-import robomimic.utils.env_utils as EnvUtils
-import robomimic.utils.file_utils as FileUtils
+import model_train.robomimic.utils.obs_utils as ObsUtils
+import model_train.robomimic.utils.env_utils as EnvUtils
+import model_train.robomimic.utils.file_utils as FileUtils
 
 from robosuite.utils.mjcf_utils import find_elements
 

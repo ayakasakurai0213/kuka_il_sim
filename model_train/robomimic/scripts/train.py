@@ -31,15 +31,15 @@ from collections import OrderedDict
 import torch
 from torch.utils.data import DataLoader
 
-import robomimic
-import robomimic.utils.train_utils as TrainUtils
-import robomimic.utils.torch_utils as TorchUtils
-import robomimic.utils.obs_utils as ObsUtils
-import robomimic.utils.env_utils as EnvUtils
-import robomimic.utils.file_utils as FileUtils
-from robomimic.config import config_factory
-from robomimic.algo import algo_factory, RolloutPolicy
-from robomimic.utils.log_utils import PrintLogger, DataLogger, flush_warnings
+import model_train.robomimic
+import model_train.robomimic.utils.train_utils as TrainUtils
+import model_train.robomimic.utils.torch_utils as TorchUtils
+import model_train.robomimic.utils.obs_utils as ObsUtils
+import model_train.robomimic.utils.env_utils as EnvUtils
+import model_train.robomimic.utils.file_utils as FileUtils
+from model_train.robomimic.config import config_factory
+from model_train.robomimic.algo import algo_factory, RolloutPolicy
+from model_train.robomimic.utils.log_utils import PrintLogger, DataLogger, flush_warnings
 
 
 def train(config, device):
@@ -85,7 +85,7 @@ def train(config, device):
         env_meta["lang"] = dataset_cfg.get("lang", "dummy")
 
         # update env meta if applicable
-        from robomimic.utils.script_utils import deep_update
+        from model_train.robomimic.utils.script_utils import deep_update
         deep_update(env_meta, config.experiment.env_meta_update_dict)
         env_meta_list.append(env_meta)
 
@@ -174,7 +174,7 @@ def train(config, device):
     ckpt_path = config.experiment.ckpt_path
     if ckpt_path is not None:
         print("LOADING MODEL WEIGHTS FROM " + ckpt_path)
-        from robomimic.utils.file_utils import maybe_dict_from_checkpoint
+        from model_train.robomimic.utils.file_utils import maybe_dict_from_checkpoint
         ckpt_dict = maybe_dict_from_checkpoint(ckpt_path=ckpt_path)
         model.deserialize(ckpt_dict["model"])
 

@@ -19,7 +19,7 @@ import argparse
 import h5py
 import numpy as np
 
-from robomimic.utils.file_utils import create_hdf5_filter_key
+from model_train.robomimic.utils.file_utils import create_hdf5_filter_key
 
 
 def split_train_val_from_hdf5(hdf5_path, val_ratio=0.1, filter_key=None):

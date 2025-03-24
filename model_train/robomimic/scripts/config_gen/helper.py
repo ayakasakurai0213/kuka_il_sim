@@ -3,8 +3,8 @@ import os
 import time
 import datetime
 
-import robomimic
-import robomimic.utils.hyperparam_utils as HyperparamUtils
+import model_train.robomimic
+import model_train.robomimic.utils.hyperparam_utils as HyperparamUtils
 
 base_path = os.path.abspath(os.path.join(os.path.dirname(robomimic.__file__), os.pardir))
 

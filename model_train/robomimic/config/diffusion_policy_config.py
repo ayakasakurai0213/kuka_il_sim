@@ -2,7 +2,7 @@
 Config for Diffusion Policy algorithm.
 """
 
-from robomimic.config.base_config import BaseConfig
+from model_train.robomimic.config.base_config import BaseConfig
 
 class DiffusionPolicyConfig(BaseConfig):
     ALGO_NAME = "diffusion_policy"

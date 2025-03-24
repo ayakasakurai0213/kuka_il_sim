@@ -14,17 +14,17 @@ from diffusers.schedulers.scheduling_ddpm import DDPMScheduler
 from diffusers.schedulers.scheduling_ddim import DDIMScheduler
 from diffusers.training_utils import EMAModel
 
-import robomimic.models.obs_nets as ObsNets
-import robomimic.utils.tensor_utils as TensorUtils
-import robomimic.utils.torch_utils as TorchUtils
-import robomimic.utils.obs_utils as ObsUtils
+import model_train.robomimic.models.obs_nets as ObsNets
+import model_train.robomimic.utils.tensor_utils as TensorUtils
+import model_train.robomimic.utils.torch_utils as TorchUtils
+import model_train.robomimic.utils.obs_utils as ObsUtils
 
-from robomimic.algo import register_algo_factory_func, PolicyAlgo
+from model_train.robomimic.algo import register_algo_factory_func, PolicyAlgo
 
 import random
-import robomimic.utils.torch_utils as TorchUtils
-import robomimic.utils.tensor_utils as TensorUtils
-import robomimic.utils.obs_utils as ObsUtils
+import model_train.robomimic.utils.torch_utils as TorchUtils
+import model_train.robomimic.utils.tensor_utils as TensorUtils
+import model_train.robomimic.utils.obs_utils as ObsUtils
 
 @register_algo_factory_func("diffusion_policy")
 def algo_config_to_class(algo_config):

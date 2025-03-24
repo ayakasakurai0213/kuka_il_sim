@@ -16,15 +16,15 @@ from collections import OrderedDict
 
 import torch
 
-import robomimic
-import robomimic.utils.tensor_utils as TensorUtils
-import robomimic.utils.log_utils as LogUtils
-import robomimic.utils.file_utils as FileUtils
+import model_train.robomimic
+import model_train.robomimic.utils.tensor_utils as TensorUtils
+import model_train.robomimic.utils.log_utils as LogUtils
+import model_train.robomimic.utils.file_utils as FileUtils
 
-from robomimic.utils.dataset import SequenceDataset, R2D2Dataset, MetaDataset
-from robomimic.envs.env_base import EnvBase
-from robomimic.envs.wrappers import EnvWrapper
-from robomimic.algo import RolloutPolicy
+from model_train.robomimic.utils.dataset import SequenceDataset, R2D2Dataset, MetaDataset
+from model_train.robomimic.envs.env_base import EnvBase
+from model_train.robomimic.envs.wrappers import EnvWrapper
+from model_train.robomimic.algo import RolloutPolicy
 from tianshou.env import SubprocVectorEnv
 
 

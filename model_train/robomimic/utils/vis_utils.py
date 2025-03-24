@@ -6,8 +6,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
-import robomimic.utils.tensor_utils as TensorUtils
-import robomimic.utils.obs_utils as ObsUtils
+import model_train.robomimic.utils.tensor_utils as TensorUtils
+import model_train.robomimic.utils.obs_utils as ObsUtils
 
 
 def image_tensor_to_numpy(image):

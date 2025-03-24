@@ -16,7 +16,7 @@ https://www.stereolabs.com/docs/installation/linux/
 """
 import pyzed.sl as sl
 
-import robomimic.utils.torch_utils as TorchUtils
+import model_train.robomimic.utils.torch_utils as TorchUtils
 
 from r2d2.camera_utils.wrappers.recorded_multi_camera_wrapper import RecordedMultiCameraWrapper
 from r2d2.trajectory_utils.trajectory_reader import TrajectoryReader

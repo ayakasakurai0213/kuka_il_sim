@@ -17,11 +17,11 @@ import os
 import numpy as np
 import imageio
 
-import robomimic.utils.tensor_utils as TensorUtils
-import robomimic.utils.torch_utils as TorchUtils
-import robomimic.utils.obs_utils as ObsUtils
-import robomimic.utils.action_utils as AcUtils
-import robomimic.utils.vis_utils as VisUtils
+import model_train.robomimic.utils.tensor_utils as TensorUtils
+import model_train.robomimic.utils.torch_utils as TorchUtils
+import model_train.robomimic.utils.obs_utils as ObsUtils
+import model_train.robomimic.utils.action_utils as AcUtils
+import model_train.robomimic.utils.vis_utils as VisUtils
 
 from torch.utils.data import DataLoader
 

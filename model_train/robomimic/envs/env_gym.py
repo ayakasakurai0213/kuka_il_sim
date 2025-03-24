@@ -13,8 +13,8 @@ try:
 except:
     print("WARNING: could not load d4rl environments!")
 
-import robomimic.envs.env_base as EB
-import robomimic.utils.obs_utils as ObsUtils
+import model_train.robomimic.envs.env_base as EB
+import model_train.robomimic.utils.obs_utils as ObsUtils
 
 
 class EnvGym(EB.EnvBase):

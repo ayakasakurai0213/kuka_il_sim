@@ -63,11 +63,11 @@ import imageio
 import numpy as np
 import random
 
-import robomimic
-import robomimic.utils.obs_utils as ObsUtils
-import robomimic.utils.env_utils as EnvUtils
-import robomimic.utils.file_utils as FileUtils
-from robomimic.envs.env_base import EnvBase, EnvType
+import model_train.robomimic
+import model_train.robomimic.utils.obs_utils as ObsUtils
+import model_train.robomimic.utils.env_utils as EnvUtils
+import model_train.robomimic.utils.file_utils as FileUtils
+from model_train.robomimic.envs.env_base import EnvBase, EnvType
 
 
 # Define default cameras to use for each env type

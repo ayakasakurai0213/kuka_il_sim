@@ -16,12 +16,12 @@ WANDB_ENTITY = None
 WANDB_API_KEY = None
 
 try:
-    from robomimic.macros_private import *
+    from model_train.robomimic.macros_private import *
 except ImportError:
-    from robomimic.utils.log_utils import log_warning
-    import robomimic
+    from model_train.robomimic.utils.log_utils import log_warning
+    import model_train.robomimic
     log_warning(
         "No private macro file found!"\
         "\nIt is recommended to use a private macro file"\
-        "\nTo setup, run: python {}/scripts/setup_macros.py".format(robomimic.__path__[0])
+        "\nTo setup, run: python {}/scripts/setup_macros.py".format(model_train.robomimic.__path__[0])
     )

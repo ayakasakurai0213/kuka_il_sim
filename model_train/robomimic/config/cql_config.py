@@ -2,7 +2,7 @@
 Config for CQL algorithm.
 """
 
-from robomimic.config.base_config import BaseConfig
+from model_train.robomimic.config.base_config import BaseConfig
 
 
 class CQLConfig(BaseConfig):

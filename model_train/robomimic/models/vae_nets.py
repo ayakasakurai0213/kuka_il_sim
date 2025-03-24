@@ -12,11 +12,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.distributions as D
 
-import robomimic.utils.loss_utils as LossUtils
-import robomimic.utils.tensor_utils as TensorUtils
-import robomimic.utils.torch_utils as TorchUtils
-from robomimic.models.base_nets import Module
-from robomimic.models.obs_nets import MIMO_MLP
+import model_train.robomimic.utils.loss_utils as LossUtils
+import model_train.robomimic.utils.tensor_utils as TensorUtils
+import model_train.robomimic.utils.torch_utils as TorchUtils
+from model_train.robomimic.models.base_nets import Module
+from model_train.robomimic.models.obs_nets import MIMO_MLP
 
 
 def vae_args_from_config(vae_config):

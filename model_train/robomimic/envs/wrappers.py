@@ -6,7 +6,7 @@ import textwrap
 import numpy as np
 from collections import deque
 
-import robomimic.envs.env_base as EB
+import model_train.robomimic.envs.env_base as EB
 
 
 class EnvWrapper(object):

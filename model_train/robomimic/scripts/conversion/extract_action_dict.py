@@ -7,7 +7,7 @@ import numpy as np
 import torch
 import os
 
-import robomimic.utils.torch_utils as TorchUtils
+import model_train.robomimic.utils.torch_utils as TorchUtils
 
 def extract_action_dict(dataset):
     # find files

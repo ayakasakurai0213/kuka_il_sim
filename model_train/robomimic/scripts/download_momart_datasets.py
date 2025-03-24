@@ -48,8 +48,8 @@ Example usage:
 import os
 import argparse
 
-import robomimic
-import robomimic.utils.file_utils as FileUtils
+import model_train.robomimic
+import model_train.robomimic.utils.file_utils as FileUtils
 from robomimic import MOMART_DATASET_REGISTRY
 
 ALL_TASKS = [

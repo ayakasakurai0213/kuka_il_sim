@@ -7,8 +7,8 @@ the correct config class given the algorithm name.
 import six # preserve metaclass compatibility between python 2 and 3
 from copy import deepcopy
 
-import robomimic
-from robomimic.config.config import Config
+import model_train.robomimic
+from model_train.robomimic.config.config import Config
 
 # global dictionary for remembering name - class mappings
 REGISTERED_CONFIGS = {}

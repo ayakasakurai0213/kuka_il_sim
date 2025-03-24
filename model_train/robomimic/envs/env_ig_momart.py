@@ -16,8 +16,8 @@ import os
 import yaml
 import cv2
 
-import robomimic.utils.obs_utils as ObsUtils
-import robomimic.envs.env_base as EB
+import model_train.robomimic.utils.obs_utils as ObsUtils
+import model_train.robomimic.envs.env_base as EB
 
 
 # TODO: Once iG 2.0 is more stable, automate available environments, similar to robosuite

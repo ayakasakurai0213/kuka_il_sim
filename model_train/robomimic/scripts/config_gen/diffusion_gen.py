@@ -1,4 +1,4 @@
-from robomimic.scripts.config_gen.helper import *
+from model_train.robomimic.scripts.config_gen.helper import *
 
 def make_generator_helper(args):
     algo_name_short = "diffusion_policy"

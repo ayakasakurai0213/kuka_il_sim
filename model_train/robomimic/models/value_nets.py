@@ -12,9 +12,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.distributions as D
 
-import robomimic.utils.tensor_utils as TensorUtils
-from robomimic.models.obs_nets import MIMO_MLP
-from robomimic.models.distributions import DiscreteValueDistribution
+import model_train.robomimic.utils.tensor_utils as TensorUtils
+from model_train.robomimic.models.obs_nets import MIMO_MLP
+from model_train.robomimic.models.distributions import DiscreteValueDistribution
 
 
 class ValueNetwork(MIMO_MLP):

@@ -12,7 +12,7 @@ import time
 from tqdm import tqdm
 from termcolor import colored
 
-import robomimic
+import model_train.robomimic
 
 # global list of warning messages can be populated with @log_warning and flushed with @flush_warnings
 WARNINGS_BUFFER = []
@@ -59,7 +59,7 @@ class DataLogger(object):
 
         if log_wandb:
             import wandb
-            import robomimic.macros as Macros
+            import model_train.robomimic.macros as Macros
             
             # set up wandb api key if specified in macros
             if Macros.WANDB_API_KEY is not None:

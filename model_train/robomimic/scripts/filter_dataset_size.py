@@ -2,7 +2,7 @@ import argparse
 import h5py
 import numpy as np
 
-from robomimic.utils.file_utils import create_hdf5_filter_key
+from model_train.robomimic.utils.file_utils import create_hdf5_filter_key
 
 
 def filter_dataset_size(hdf5_path, num_demos, input_filter_key=None, output_filter_key=None):

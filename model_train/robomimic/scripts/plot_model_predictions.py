@@ -7,12 +7,12 @@ from copy import deepcopy
 import random
 from sklearn.metrics import mean_squared_error
 import re
-import robomimic.utils.file_utils as FileUtils
-import robomimic.utils.torch_utils as TorchUtils
-import robomimic.utils.tensor_utils as TensorUtils
-import robomimic.utils.train_utils as TrainUtils
-from robomimic.config import config_factory
-import robomimic.utils.obs_utils as ObsUtils
+import model_train.robomimic.utils.file_utils as FileUtils
+import model_train.robomimic.utils.torch_utils as TorchUtils
+import model_train.robomimic.utils.tensor_utils as TensorUtils
+import model_train.robomimic.utils.train_utils as TrainUtils
+from model_train.robomimic.config import config_factory
+import model_train.robomimic.utils.obs_utils as ObsUtils
 import torch
 from torch.utils.data import DataLoader
 

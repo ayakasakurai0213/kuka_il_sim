@@ -50,10 +50,10 @@ import argparse
 import numpy as np
 from copy import deepcopy
 
-import robomimic.utils.tensor_utils as TensorUtils
-import robomimic.utils.file_utils as FileUtils
-import robomimic.utils.env_utils as EnvUtils
-from robomimic.envs.env_base import EnvBase
+import model_train.robomimic.utils.tensor_utils as TensorUtils
+import model_train.robomimic.utils.file_utils as FileUtils
+import model_train.robomimic.utils.env_utils as EnvUtils
+from model_train.robomimic.envs.env_base import EnvBase
 
 
 def extract_trajectory(

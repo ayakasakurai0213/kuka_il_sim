@@ -10,14 +10,14 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-import robomimic.models.base_nets as BaseNets
-import robomimic.models.obs_nets as ObsNets
-import robomimic.models.policy_nets as PolicyNets
-import robomimic.models.value_nets as ValueNets
-import robomimic.utils.obs_utils as ObsUtils
-import robomimic.utils.tensor_utils as TensorUtils
-import robomimic.utils.torch_utils as TorchUtils
-from robomimic.algo import register_algo_factory_func, ValueAlgo, PolicyAlgo
+import model_train.robomimic.models.base_nets as BaseNets
+import model_train.robomimic.models.obs_nets as ObsNets
+import model_train.robomimic.models.policy_nets as PolicyNets
+import model_train.robomimic.models.value_nets as ValueNets
+import model_train.robomimic.utils.obs_utils as ObsUtils
+import model_train.robomimic.utils.tensor_utils as TensorUtils
+import model_train.robomimic.utils.torch_utils as TorchUtils
+from model_train.robomimic.algo import register_algo_factory_func, ValueAlgo, PolicyAlgo
 
 
 @register_algo_factory_func("cql")

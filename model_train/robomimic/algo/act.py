@@ -8,10 +8,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as transforms
 
-import robomimic.utils.tensor_utils as TensorUtils
+import model_train.robomimic.utils.tensor_utils as TensorUtils
 
-from robomimic.algo import register_algo_factory_func, PolicyAlgo
-from robomimic.algo.bc import BC_VAE
+from model_train.robomimic.algo import register_algo_factory_func, PolicyAlgo
+from model_train.robomimic.algo.bc import BC_VAE
 
 
 @register_algo_factory_func("act")

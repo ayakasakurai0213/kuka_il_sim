@@ -3,7 +3,7 @@ Set of general purpose utility functions for easier interfacing with Python API
 """
 import inspect
 from copy import deepcopy
-import robomimic.macros as Macros
+import model_train.robomimic.macros as Macros
 
 
 def get_class_init_kwargs(cls):

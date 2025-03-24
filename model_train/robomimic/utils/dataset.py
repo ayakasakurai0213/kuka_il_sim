@@ -12,11 +12,11 @@ from collections import OrderedDict
 
 import torch.utils.data
 
-import robomimic.utils.tensor_utils as TensorUtils
-import robomimic.utils.obs_utils as ObsUtils
-import robomimic.utils.action_utils as AcUtils
-import robomimic.utils.log_utils as LogUtils
-import robomimic.utils.lang_utils as LangUtils
+import model_train.robomimic.utils.tensor_utils as TensorUtils
+import model_train.robomimic.utils.obs_utils as ObsUtils
+import model_train.robomimic.utils.action_utils as AcUtils
+import model_train.robomimic.utils.log_utils as LogUtils
+import model_train.robomimic.utils.lang_utils as LangUtils
 
 
 class SequenceDataset(torch.utils.data.Dataset):

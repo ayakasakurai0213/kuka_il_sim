@@ -25,10 +25,10 @@ import argparse
 import numpy as np
 from tqdm import tqdm
 
-import robomimic
-import robomimic.envs.env_base as EB
-from robomimic.utils.file_utils import create_hdf5_filter_key
-from robomimic.scripts.split_train_val import split_train_val_from_hdf5
+import model_train.robomimic
+import model_train.robomimic.envs.env_base as EB
+from model_train.robomimic.utils.file_utils import create_hdf5_filter_key
+from model_train.robomimic.scripts.split_train_val import split_train_val_from_hdf5
 
 
 def convert_rt_pilot_hdf5(ref_folder):

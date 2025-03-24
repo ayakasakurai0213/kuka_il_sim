@@ -37,8 +37,8 @@ Example usage:
 """
 import argparse
 
-import robomimic
-import robomimic.utils.hyperparam_utils as HyperparamUtils
+import model_train.robomimic
+import model_train.robomimic.utils.hyperparam_utils as HyperparamUtils
 
 
 def make_generator(config_file, script_file):

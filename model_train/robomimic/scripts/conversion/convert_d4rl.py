@@ -34,9 +34,9 @@ import numpy as np
 
 import gym
 import d4rl
-import robomimic
-from robomimic.envs.env_gym import EnvGym
-from robomimic.utils.log_utils import custom_tqdm
+import model_train.robomimic
+from model_train.robomimic.envs.env_gym import EnvGym
+from model_train.robomimic.utils.log_utils import custom_tqdm
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

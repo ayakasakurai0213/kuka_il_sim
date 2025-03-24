@@ -15,12 +15,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.distributions as D
 
-import robomimic.utils.tensor_utils as TensorUtils
-from robomimic.models.base_nets import Module
-from robomimic.models.transformers import GPT_Backbone
-from robomimic.models.obs_nets import MIMO_MLP, RNN_MIMO_MLP, MIMO_Transformer, ObservationDecoder
-from robomimic.models.vae_nets import VAE
-from robomimic.models.distributions import TanhWrappedDistribution
+import model_train.robomimic.utils.tensor_utils as TensorUtils
+from model_train.robomimic.models.base_nets import Module
+from model_train.robomimic.models.transformers import GPT_Backbone
+from model_train.robomimic.models.obs_nets import MIMO_MLP, RNN_MIMO_MLP, MIMO_Transformer, ObservationDecoder
+from model_train.robomimic.models.vae_nets import VAE
+from model_train.robomimic.models.distributions import TanhWrappedDistribution
 
 
 class ActorNetwork(MIMO_MLP):
