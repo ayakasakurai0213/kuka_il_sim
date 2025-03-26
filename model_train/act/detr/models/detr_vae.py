@@ -77,7 +77,7 @@ class DETRVAE(nn.Module):
             self.input_proj_robot_state = nn.Linear(state_dim, hidden_dim)
         
         else:
-            # input_dim = 14 + 7 # robot_state + env_state
+            # input_dim = 12 + 7 # robot_state + env_state
             self.input_proj_robot_state = nn.Linear(state_dim, hidden_dim)
             self.pos = torch.nn.Embedding(2, hidden_dim)
             self.backbones = None
@@ -485,7 +485,7 @@ def build(args):
     if args.use_robot_base:
         state_dim = 16  # TODO hardcode
     else:
-        state_dim = 14
+        state_dim = 12
 
     # From state
     # backbone = None # from state for now, no need for conv nets
