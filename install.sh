@@ -13,5 +13,6 @@ pip3 install numpy==1.26.4 \
     tqdm==4.67.1 \
     diffusers==0.32.2 \
     imageio==2.37.0 \
-    einops==0.8.0
+    einops==0.8.0 \
+    termcolor==2.5.0
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118

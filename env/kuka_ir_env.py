@@ -143,7 +143,8 @@ class KukaIrEnv(KukaGymEnv):
     p.stepSimulation()
 
     # Choose the objects in the bin.
-    urdfList = self._get_random_object(self._numObjects, self._isTest)
+    # urdfList = self._get_random_object(self._numObjects, self._isTest)
+    urdfList = [self._urdfRoot+'/random_urdfs/156/156.urdf']
     self._objectUids = self._randomly_place_objects(urdfList)
     self._observation = self._get_observation()[0]
     return np.array(self._observation)
@@ -383,11 +384,12 @@ class KukaIrEnv(KukaGymEnv):
     else:
       urdf_pattern = os.path.join(self._urdfRoot, 'random_urdfs/*[1-9]/*.urdf')
     found_object_directories = glob.glob(urdf_pattern)
-    total_num_objects = len(found_object_directories)
+    total_num_objects = len(found_object_directories)   # 900
     selected_objects = np.random.choice(np.arange(total_num_objects), num_objects)
     selected_objects_filenames = []
     for object_index in selected_objects:
       selected_objects_filenames += [found_object_directories[object_index]]
+    print(selected_objects_filenames)
     return selected_objects_filenames
 
   if parse_version(gym.__version__) < parse_version('0.9.6'):

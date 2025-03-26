@@ -276,7 +276,7 @@ def get_arguments():
     parser.add_argument('--ckpt_dir', action='store', type=str, help='ckpt_dir', default='./ckpt', required=False)
     parser.add_argument('--num_episodes', action='store', type=int, help='num_episodes', required=True)
    
-    parser.add_argument('--pretrain_ckpt', action='store', type=str, help='pretrain_ckpt', default='policy_best.ckpt', required=False)
+    parser.add_argument('--pretrain_ckpt', action='store', type=str, help='pretrain_ckpt', default='', required=False)
     parser.add_argument('--task_name', action='store', type=str, help='task_name', default='ploject_test', required=False)
     
     parser.add_argument('--ckpt_name', action='store', type=str, help='ckpt_name', default='policy_best.ckpt', required=False)
