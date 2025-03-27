@@ -186,7 +186,6 @@ def inference_process(args, config, kuka_operator, policy, stats, t, pre_action)
             if print_flag:
                 print("syn fail")
                 print_flag = False
-            time.sleep(1)
             continue
         print_flag = True
         (img_top, img_hand, img_top_depth, img_hand_depth, arm_joint, robot_base) = result
@@ -270,9 +269,6 @@ def model_inference(args, config, kuka_operator, save_episode=True):
     max_publish_step = config['episode_len']
     chunk_size = config['policy_config']['chunk_size']
 
-    # ros_operator.puppet_arm_publish_continuous(left0, right0)
-    # input("Enter any key to continue :")
-    # ros_operator.puppet_arm_publish_continuous(left1, right1)
     action = None
     # 推理
     with torch.inference_mode():
@@ -321,18 +317,14 @@ def model_inference(args, config, kuka_operator, save_episode=True):
                     raise NotImplementedError
                 action = post_process(raw_action[0])
                 kuka_operator.control_pos(action)
-                # ros_operator.puppet_arm_publish(left_action, right_action)  # puppet_arm_publish_continuous_thread
                 if args.use_robot_base:
                     vel_action = action[12:14]
                     kuka_operator.control_pos(vel_action)
-                    # ros_operator.robot_base_publish(vel_action)
                 t += 1
                 # end_time = time.time()
                 # print("publish: ", t)
                 # print("time:", end_time - start_time)
-                # print("left_action:", left_action)
-                # print("right_action:", right_action)
-                time.sleep(0.05)
+                # print("action:", action)
 
 
 class KukaOperator:
@@ -376,7 +368,7 @@ class KukaOperator:
     
     def control_pos(self, action):
         for i in range(len(self.param_ids)):
-            p.setJointMotorControl2(self.kuka_id, self.joint_ids[i], p.POSITION_CONTROL, action, force=5 * 240.)
+            p.setJointMotorControl2(self.kuka_id, self.joint_ids[i], p.POSITION_CONTROL, action[i], force=5 * 240.)
         time.sleep(0.01)
         
     def get_top_img(self):
