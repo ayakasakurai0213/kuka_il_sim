@@ -1,6 +1,3 @@
-"""
-#!/usr/bin/python3
-"""
 import os
 import sys
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -241,11 +238,9 @@ def model_inference(args, config, kuka_operator, save_episode=True):
     global inference_lock, inference_actions, inference_timestep, inference_thread
     set_seed(1000)
 
-    # 1 创建模型数据  继承nn.Module
     policy = make_policy(config['policy_class'], config['policy_config'])
     # print("model structure\n", policy.model)
     
-    # 2 加载模型权重
     ckpt_path = os.path.join(config['ckpt_dir'], config['ckpt_name'])
     state_dict = torch.load(ckpt_path)
     new_state_dict = {}
@@ -260,11 +255,9 @@ def model_inference(args, config, kuka_operator, save_episode=True):
         print("ckpt path not exist")
         return False
 
-    # 3 模型设置为cuda模式和验证模式
     policy.cuda()
     policy.eval()
 
-    # 4 加载统计值
     stats_path = os.path.join(config['ckpt_dir'], config['ckpt_stats_name'])
     # 统计的数据  # 加载action_mean, action_std, qpos_mean, qpos_std 14维
     with open(stats_path, 'rb') as f:
@@ -283,6 +276,7 @@ def model_inference(args, config, kuka_operator, save_episode=True):
     action = None
     # 推理
     with torch.inference_mode():
+        p.setRealTimeSimulation(1)
         while True:
             # 每个回合的步数
             t = 0
@@ -415,8 +409,8 @@ class KukaOperator:
 
 def get_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--ckpt_dir', action='store', type=str, help='ckpt_dir', required=True)
-    parser.add_argument('--task_name', action='store', type=str, help='task_name', default='aloha_mobile_dummy', required=False)
+    parser.add_argument('--ckpt_dir', action='store', type=str, help='ckpt_dir', default='./ckpt', required=False)
+    parser.add_argument('--task_name', action='store', type=str, help='task_name', default='project_test', required=False)
     parser.add_argument('--max_publish_step', action='store', type=int, help='max_publish_step', default=10000, required=False)
     parser.add_argument('--ckpt_name', action='store', type=str, help='ckpt_name', default='policy_best.ckpt', required=False)
     parser.add_argument('--ckpt_stats_name', action='store', type=str, help='ckpt_stats_name', default='dataset_stats.pkl', required=False)
@@ -437,7 +431,7 @@ def get_arguments():
     parser.add_argument('--dim_feedforward', action='store', type=int, help='dim_feedforward', default=3200, required=False)
     parser.add_argument('--temporal_agg', action='store', type=bool, help='temporal_agg', default=True, required=False)
 
-    parser.add_argument('--state_dim', action='store', type=int, help='state_dim', default=14, required=False)
+    parser.add_argument('--state_dim', action='store', type=int, help='state_dim', default=12, required=False)
     parser.add_argument('--lr_backbone', action='store', type=float, help='lr_backbone', default=1e-5, required=False)
     parser.add_argument('--backbone', action='store', type=str, help='backbone', default='resnet18', required=False)
     parser.add_argument('--loss_function', action='store', type=str, help='loss_function l1 l2 l1+l2', default='l1', required=False)
@@ -472,12 +466,13 @@ def get_arguments():
 
 def main():
     args = get_arguments()
-    env = KukaIrEnv()
-    ros_operator = KukaOperator(env, args)
+    env = KukaIrEnv(renders=True, isDiscrete=True)
+    env.reset()
+    kuka_operator = KukaOperator(env, args)
     config = get_model_config(args)
-    model_inference(args, config, ros_operator, save_episode=True)
+    model_inference(args, config, kuka_operator, save_episode=True)
 
 
 if __name__ == '__main__':
     main()
-# python act/inference.py --ckpt_dir ~/train0314/
+# python model_train/act/inference.py

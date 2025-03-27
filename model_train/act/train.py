@@ -334,4 +334,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-# python act/train.py --dataset_dir ./datasets --ckpt_dir ./ckpt/project_test --task_name "project_test" --num_episodes 100 --num_epochs 3000
+# python model_train/act/train.py --dataset_dir ./datasets --ckpt_dir ./ckpt/project_test --task_name "project_test" --num_episodes 100 --num_epochs 3000

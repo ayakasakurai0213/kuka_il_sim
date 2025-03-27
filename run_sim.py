@@ -1,7 +1,6 @@
 import os
 root_dir = os.path.dirname(os.path.abspath(__file__))
 import cv2
-import torch
 import pybullet as p
 import threading
 import time
