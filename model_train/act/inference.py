@@ -467,4 +467,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-# python model_train/act/inference.py
+# python model_train/act/inference.py --ckpt_dir ./ckpt/project_test --task_name "project_test"
