@@ -242,6 +242,7 @@ class KukaIrEnv(KukaGymEnv):
     # If we are close to the bin, attempt grasp.
     state = p.getLinkState(self._kuka.kukaUid, self._kuka.kukaEndEffectorIndex)
     end_effector_pos = state[0]
+    # print(end_effector_pos)
     if 9 in key:
       grasp_action = [0, 0, 0, 0, self.finger_angle]
       self._kuka.applyAction(grasp_action)

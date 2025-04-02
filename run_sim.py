@@ -5,7 +5,6 @@ import pybullet as p
 import threading
 import time
 from env.kuka_ir_env import KukaIrEnv
-
 from keybord_control import Keyboard
 
 
@@ -13,19 +12,16 @@ class Kuka_sim:
     def __init__(self, env):
         self.env = env
         self.kuka_id = self.env._kuka.kukaUid
-        # self.device = device
         self.init_pos()
     
-    
     def init_pos(self):
-        self.joint_ids = []     # 0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 13
+        self.joint_ids = self.env._kuka.kukaGetJointIndex     # 0, 1, 2, 3, 4, 5, 6, 7, 8, 11
         self.param_ids = []
         joint_name_lst = []
         i_pos = [
             0.006411874501842649, 0.41318442787173143, -0.01140244401433773, 
             -1.5893163205429706, 0.005379, 1.1376840457008266, -0.006534958891813817, 
-            5.800820781903633e-05, -0.29991772759079405, -4.1277527065243654e-05, 
-            0.299948297597285, -0.0002196091555209944
+            5.800820781903633e-05, -self.env.finger_angle, self.env.finger_angle
             ]
         
         # set joints
@@ -33,15 +29,12 @@ class Kuka_sim:
             info = p.getJointInfo(self.kuka_id, i)
             # print(info)
             joint_name = info[1]
-            joint_type = info[2]
-            if joint_type == p.JOINT_PRISMATIC or joint_type == p.JOINT_REVOLUTE:
-                self.joint_ids.append(i) 
+            if i in self.joint_ids:
                 joint_name_lst.append(joint_name)
                 
         for i in range(len(self.joint_ids)):
             self.param_ids.append(p.addUserDebugParameter(joint_name_lst[i].decode("utf-8"), -4, 4, i_pos[i]))
         return
-
 
     def get_joint(self):
         joint_pos = {"qpos": [], "qvel": [], "torque": [], "effort": []}
@@ -50,8 +43,9 @@ class Kuka_sim:
             joint_state = p.getJointState(self.kuka_id, self.joint_ids[i])
             for j in range(len(joint_state)):
                 joint_pos[keys[j]].append(joint_state[j])
+        joint_pos["qpos"][-2] = self.env.finger_angle * -1
+        joint_pos["qpos"][-1] = self.env.finger_angle
         return joint_pos
-    
     
     def control_pos(self):
         count = 0
@@ -61,7 +55,7 @@ class Kuka_sim:
                 target_joint = p.readUserDebugParameter(self.param_ids[i])
                 p.setJointMotorControl2(self.kuka_id, self.joint_ids[i], p.POSITION_CONTROL, target_joint, force=5 * 240.)
                 current_joint = self.get_joint()
-                # top_img = self.get_screen()
+                # top_img = self.get_top_img()
                 hand_img = self.get_hand_img()
             time.sleep(0.01)
             count += 1
@@ -90,21 +84,21 @@ class Kuka_sim:
 def main():
     env = KukaIrEnv(renders=True, isDiscrete=True, numObjects=1)
     env.reset()
-    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     kuka_sim = Kuka_sim(env)
+    # input on keyboard or gamepad
     thread = threading.Thread(target=kuka_sim.control_key, name="keyboard_thread", daemon=True)
     thread.start()
-    # joint_pos = kuka_sim.get_joint()
-    # print(joint_pos)
     
     p.setRealTimeSimulation(1)
+    # kuka_sim.control_pos()
     while True:
-        # kuka_sim.control_pos()
         env.reset()
         for i in range(1000):
-            # キーボードまたはゲームパッド入力取得
             kuka_sim.get_top_img()
             kuka_sim.get_hand_img()
+            # joint_pos = kuka_sim.get_joint()
+            # print(joint_pos["qpos"])
+            # print(env.finger_angle)
         
 
 if __name__ == "__main__": 

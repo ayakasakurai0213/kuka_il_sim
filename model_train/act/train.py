@@ -295,7 +295,7 @@ def get_arguments():
     parser.add_argument('--masks', action='store_true',
                         help="Train segmentation head if the flag is provided")
 
-    parser.add_argument('--state_dim', action='store', type=int, help='state_dim', default=12, required=False)
+    parser.add_argument('--state_dim', action='store', type=int, help='state_dim', default=10, required=False)
     parser.add_argument('--lr_backbone', action='store', type=float, help='lr_backbone', default=4e-5, required=False)
     parser.add_argument('--backbone', action='store', type=str, help='backbone', default='resnet18', required=False)
     parser.add_argument('--loss_function', action='store', type=str, help='loss_function l1 l2 l1+l2', default='l1', required=False)

@@ -318,7 +318,7 @@ def model_inference(args, config, kuka_operator, save_episode=True):
                 action = post_process(raw_action[0])
                 kuka_operator.control_pos(action)
                 if args.use_robot_base:
-                    vel_action = action[12:14]
+                    vel_action = action[10:12]
                     kuka_operator.control_pos(vel_action)
                 t += 1
                 # end_time = time.time()
@@ -335,22 +335,20 @@ class KukaOperator:
         self.init()
         
     def init(self):
-        self.joint_ids = []
+        self.joint_ids = self.env._kuka.kukaGetJointIndex
         self.param_ids = []
         joint_name_lst = []
         i_pos = [
             0.006411874501842649, 0.41318442787173143, -0.01140244401433773, 
             -1.5893163205429706, 0.005379, 1.1376840457008266, -0.006534958891813817, 
-            5.800820781903633e-05, -0.29991772759079405, -4.1277527065243654e-05, 
-            0.299948297597285, -0.0002196091555209944
+            5.800820781903633e-05, -self.env.finger_angle, self.env.finger_angle
             ]
         # set joints
         for i in range(p.getNumJoints(self.kuka_id)):
             info = p.getJointInfo(self.kuka_id, i)
             # print(info)
             joint_name = info[1]
-            joint_type = info[2]
-            if joint_type == p.JOINT_PRISMATIC or joint_type == p.JOINT_REVOLUTE:
+            if i in self.joint_ids:
                 self.joint_ids.append(i) 
                 joint_name_lst.append(joint_name)
                 
@@ -364,6 +362,8 @@ class KukaOperator:
             joint_state = p.getJointState(self.kuka_id, self.joint_ids[i])
             for j in range(len(joint_state)):
                 joint_pos[keys[j]].append(joint_state[j])
+        joint_pos["qpos"][-2] = self.env.finger_angle * -1
+        joint_pos["qpos"][-1] = self.env.finger_angle
         return joint_pos
     
     def control_pos(self, action):
@@ -423,7 +423,7 @@ def get_arguments():
     parser.add_argument('--dim_feedforward', action='store', type=int, help='dim_feedforward', default=3200, required=False)
     parser.add_argument('--temporal_agg', action='store', type=bool, help='temporal_agg', default=True, required=False)
 
-    parser.add_argument('--state_dim', action='store', type=int, help='state_dim', default=12, required=False)
+    parser.add_argument('--state_dim', action='store', type=int, help='state_dim', default=10, required=False)
     parser.add_argument('--lr_backbone', action='store', type=float, help='lr_backbone', default=1e-5, required=False)
     parser.add_argument('--backbone', action='store', type=str, help='backbone', default='resnet18', required=False)
     parser.add_argument('--loss_function', action='store', type=str, help='loss_function l1 l2 l1+l2', default='l1', required=False)
