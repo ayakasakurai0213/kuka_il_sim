@@ -348,8 +348,7 @@ class KukaOperator:
             info = p.getJointInfo(self.kuka_id, i)
             # print(info)
             joint_name = info[1]
-            if i in self.joint_ids:
-                self.joint_ids.append(i) 
+            if i in self.joint_ids: 
                 joint_name_lst.append(joint_name)
                 
         for i in range(len(self.joint_ids)):
