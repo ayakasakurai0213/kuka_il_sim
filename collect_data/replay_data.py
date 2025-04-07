@@ -61,23 +61,20 @@ def main(args):
     env = KukaIrEnv(renders=True, isDiscrete=True)
     env.reset()
     kuka_id = env._kuka.kukaUid
-    joint_ids = []
+    joint_ids = env._kuka.kukaGetJointIndex
     param_ids = []
     joint_name_lst = []
     origin_joint = [
         0.006411874501842649, 0.41318442787173143, -0.01140244401433773, 
         -1.5893163205429706, 0.005379, 1.1376840457008266, -0.006534958891813817, 
-        5.800820781903633e-05, -0.29991772759079405, -4.1277527065243654e-05, 
-        0.299948297597285, -0.0002196091555209944
+        5.800820781903633e-05, -env.finger_angle, env.finger_angle
         ]
     # set joints
     for i in range(p.getNumJoints(kuka_id)):
         info = p.getJointInfo(kuka_id, i)
         # print(info)
         joint_name = info[1]
-        joint_type = info[2]
-        if joint_type == p.JOINT_PRISMATIC or joint_type == p.JOINT_REVOLUTE:
-            joint_ids.append(i) 
+        if i in joint_ids:
             joint_name_lst.append(joint_name.decode("utf-8"))        
     for i in range(len(joint_ids)):
         param_ids.append(p.addUserDebugParameter(joint_name_lst[i], -4, 4, origin_joint[i]))

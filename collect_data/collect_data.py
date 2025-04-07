@@ -68,10 +68,10 @@ def save_data(args, timesteps, actions, dataset_path):
                 _ = image_depth.create_dataset(cam_name, (data_size, 480, 640), dtype='uint16',
                                              chunks=(1, 480, 640), )
 
-        _ = obs.create_dataset('qpos', (data_size, 12))
-        _ = obs.create_dataset('qvel', (data_size, 12))
-        _ = obs.create_dataset('effort', (data_size, 12))
-        _ = root.create_dataset('action', (data_size, 12))
+        _ = obs.create_dataset('qpos', (data_size, 10))
+        _ = obs.create_dataset('qvel', (data_size, 10))
+        _ = obs.create_dataset('effort', (data_size, 10))
+        _ = root.create_dataset('action', (data_size, 10))
         _ = root.create_dataset('base_action', (data_size, 2))
 
         # data_dict write into h5py.File
@@ -90,23 +90,20 @@ class KukaOperator:
         
 
     def init(self):
-        self.joint_ids = []
+        self.joint_ids = self.env._kuka.kukaGetJointIndex
         self.param_ids = []
         joint_name_lst = []
         i_pos = [
             0.006411874501842649, 0.41318442787173143, -0.01140244401433773, 
             -1.5893163205429706, 0.005379, 1.1376840457008266, -0.006534958891813817, 
-            5.800820781903633e-05, -0.29991772759079405, -4.1277527065243654e-05, 
-            0.299948297597285, -0.0002196091555209944
+            5.800820781903633e-05, -self.env.finger_angle, self.env.finger_angle
             ]
         # set joints
         for i in range(p.getNumJoints(self.kuka_id)):
             info = p.getJointInfo(self.kuka_id, i)
             # print(info)
             joint_name = info[1]
-            joint_type = info[2]
-            if joint_type == p.JOINT_PRISMATIC or joint_type == p.JOINT_REVOLUTE:
-                self.joint_ids.append(i) 
+            if i in self.joint_ids:
                 joint_name_lst.append(joint_name)
                 
         for i in range(len(self.joint_ids)):
@@ -120,6 +117,8 @@ class KukaOperator:
             joint_state = p.getJointState(self.kuka_id, self.joint_ids[i])
             for j in range(len(joint_state)):
                 joint_pos[keys[j]].append(joint_state[j])
+        joint_pos["qpos"][-2] = self.env.finger_angle * -1
+        joint_pos["qpos"][-1] = self.env.finger_angle
         return joint_pos
     
     
@@ -147,6 +146,7 @@ class KukaOperator:
         # print("img_top:", img_top.shape)
         img_hand, img_hand_depth = self.get_hand_img()
         arm_joint = self.get_joint()
+        # print(arm_joint)
 
         if self.args.use_depth_image == False:
             img_top_depth = None
