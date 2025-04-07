@@ -7,13 +7,13 @@ import time
 from env.kuka_ir_env import KukaIrEnv
 
 from keybord_control import Keyboard
+from game_pad import Gamepad
 
 
 class Kuka_sim:
     def __init__(self, env):
         self.env = env
         self.kuka_id = self.env._kuka.kukaUid
-        # self.device = device
         self.init_pos()
     
     
@@ -67,44 +67,44 @@ class Kuka_sim:
             count += 1
         return
     
-    def control_key(self):
-        keyboard = Keyboard()
-        while True:
-            keyboard.action, keyboard.text = keyboard.get_pressed_key()
-            keyboard.update(keyboard.text)
-            self.env.arm_control(keyboard.action)
     
     def get_top_img(self):
         screen = self.env._get_observation()[0]
         top_img = cv2.cvtColor(screen, cv2.COLOR_RGB2BGR)
-        cv2.imwrite("images/test1.jpg", top_img)
+        # cv2.imwrite("images/test1.jpg", top_img)
         return top_img
     
     def get_hand_img(self):
         screen = self.env._get_hand_cam()[0]
         hand_img = cv2.cvtColor(screen, cv2.COLOR_RGB2BGR)
-        cv2.imwrite("images/test2.jpg", hand_img)
+        # cv2.imwrite("images/test2.jpg", hand_img)
         return hand_img
     
 
 def main():
     env = KukaIrEnv(renders=True, isDiscrete=True, numObjects=1)
     env.reset()
-    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     kuka_sim = Kuka_sim(env)
-    thread = threading.Thread(target=kuka_sim.control_key, name="keyboard_thread", daemon=True)
-    thread.start()
-    # joint_pos = kuka_sim.get_joint()
-    # print(joint_pos)
+    # keyboard = Keyboard()
+    gamepad = Gamepad()
     
     p.setRealTimeSimulation(1)
     while True:
         # kuka_sim.control_pos()
         env.reset()
         for i in range(1000):
-            # キーボードまたはゲームパッド入力取得
-            kuka_sim.get_top_img()
-            kuka_sim.get_hand_img()
+            # input on keyboard or gamepad
+            dx, dy, dz, da = gamepad.control()
+            env.arm_control_joycon(dx, dy, dz, da, gamepad.grip)
+            
+            # action = keyboard.control()
+            # keyboard.update(action)
+            # env.arm_control(action)
+            
+            # kuka_sim.get_top_img()
+            # kuka_sim.get_hand_img()
+            # joint_pos = kuka_sim.get_joint()
+            # print(joint_pos[0])
         
 
 if __name__ == "__main__": 

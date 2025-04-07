@@ -255,6 +255,28 @@ class KukaIrEnv(KukaGymEnv):
         self.finger_angle = 0.3
 
 
+  def arm_control_joycon(self, dx, dy, dz, da, grip):
+    action = [dx, dy, dz, da, self.finger_angle]
+    self._kuka.applyAction(action)
+    for _ in range(self._actionRepeat):
+      p.stepSimulation()
+      
+    # If we are close to the bin, attempt grasp.
+    state = p.getLinkState(self._kuka.kukaUid, self._kuka.kukaEndEffectorIndex)
+    end_effector_pos = state[0]
+    if grip==1:
+      grasp_action = [0, 0, 0, 0, self.finger_angle]
+      self._kuka.applyAction(grasp_action)
+      p.stepSimulation()
+      self.finger_angle -= 0.3 / 10.
+      if self.finger_angle < 0:
+        self.finger_angle = 0
+    else:
+      self.finger_angle += 0.3 / 10.
+      if self.finger_angle > 0.3:
+        self.finger_angle = 0.3
+
+
   def step(self, action):
     """Environment step.
 
