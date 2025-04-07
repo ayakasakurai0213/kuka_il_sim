@@ -216,46 +216,9 @@ class KukaIrEnv(KukaGymEnv):
     np_rgb_img_arr = np.reshape(rgb, (self._height, self._width, 4)) 
     np_depth_img_arr = img_arr[3] 
     return np_rgb_img_arr[:, :, :3], np_depth_img_arr[:, :]
-  
-  
-  def arm_control(self, key: list):
-    """
-    0: stay, 1: right, 2: left, 3: front, 4: back, 5: down, 6: up, 
-    7: gripper CW, 8: gripper semi-CW, 9: gripper close
-    """
-    dv = 0.003
-    dx, dy, dz, da = 0, 0, 0, 0
-    
-    for idx in range(9):
-      if idx in key:
-        dx += [0, -dv, dv, 0, 0, 0, 0, 0, 0][idx]
-        dy += [0, 0, 0, -dv, dv, 0, 0, 0, 0][idx]
-        dz += [0, 0, 0, 0, 0, -dv, dv, 0, 0][idx]
-        da += [0, 0, 0, 0, 0, 0, 0, -0.10, 0.10][idx]
-    
-    action = [dx, dy, dz, da, self.finger_angle]
-    
-    self._kuka.applyAction(action)
-    for _ in range(self._actionRepeat):
-      p.stepSimulation()
-      
-    # If we are close to the bin, attempt grasp.
-    state = p.getLinkState(self._kuka.kukaUid, self._kuka.kukaEndEffectorIndex)
-    end_effector_pos = state[0]
-    if 9 in key:
-      grasp_action = [0, 0, 0, 0, self.finger_angle]
-      self._kuka.applyAction(grasp_action)
-      p.stepSimulation()
-      self.finger_angle -= 0.3 / 10.
-      if self.finger_angle < 0:
-        self.finger_angle = 0
-    else:
-      self.finger_angle += 0.3 / 10.
-      if self.finger_angle > 0.3:
-        self.finger_angle = 0.3
 
 
-  def arm_control_joycon(self, dx, dy, dz, da, grip):
+  def arm_control(self, dx, dy, dz, da, grip):
     action = [dx, dy, dz, da, self.finger_angle]
     self._kuka.applyAction(action)
     for _ in range(self._actionRepeat):

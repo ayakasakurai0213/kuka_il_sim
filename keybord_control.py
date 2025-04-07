@@ -1,12 +1,13 @@
 from pygame.locals import *
 import pygame
 import sys
+import time
 
 
 class Keyboard:
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((400, 50))
+        self.screen = pygame.display.set_mode((600, 50))
         self.font = pygame.font.Font(None, 50)
         pygame.display.set_caption("keyboard event") 
         
@@ -26,41 +27,38 @@ class Keyboard:
             pygame.display.update()
             
     def control(self):
-        # action_dict = {
-        #     0: "stay", 1: "right", 2: "left", 3: "front", 4: "back", 5: "down", 
-        #     6: "up", 7: "gripper CW", 8: "gripper semi-CW", 9: "gripper close"
-        #     }
-        action = []
+        dx, dy, dz, da, grip = 0, 0, 0, 0, 0
+        dv = 0.003
+        
         pressed_key = pygame.key.get_pressed()
         if any(pressed_key):
             if pressed_key[K_d]:
-                action.append(1)
+                dx -= dv
             if pressed_key[K_a]:
-                action.append(2)
+                dx += dv
             if pressed_key[K_w]:
-                action.append(3)
+                dy -= dv
             if pressed_key[K_s]:
-                action.append(4)
+                dy += dv
             if pressed_key[K_DOWN]:
-                action.append(5)
+                dz -= dv
             if pressed_key[K_UP]:
-                action.append(6)
+                dz += dv
             if pressed_key[K_RIGHT] and pressed_key[K_LSHIFT]:
-                action.append(7)
+                da -= 0.10
             if pressed_key[K_LEFT] and pressed_key[K_LSHIFT]:
-                action.append(8)
+                da += 0.10
             if pressed_key[K_SPACE]:
-                action.append(9)
-        else:
-            action.append(0)
-        return action
+                grip += 1
+                
+        return dx, dy, dz, da, grip
 
 
 def main():
     keyboard = Keyboard()
     while True:
-        action = keyboard.control()
-        keyboard.update(action)
+        dx, dy, dz, da, grip = keyboard.control()
+        keyboard.update([dx, dy, dz, da, grip])
         
         
 if __name__ == "__main__":

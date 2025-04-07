@@ -61,7 +61,7 @@ class Kuka_sim:
                 target_joint = p.readUserDebugParameter(self.param_ids[i])
                 p.setJointMotorControl2(self.kuka_id, self.joint_ids[i], p.POSITION_CONTROL, target_joint, force=5 * 240.)
                 current_joint = self.get_joint()
-                # top_img = self.get_screen()
+                # top_img = self.get_top_img()
                 hand_img = self.get_hand_img()
             time.sleep(0.01)
             count += 1
@@ -85,8 +85,8 @@ def main():
     env = KukaIrEnv(renders=True, isDiscrete=True, numObjects=1)
     env.reset()
     kuka_sim = Kuka_sim(env)
-    # keyboard = Keyboard()
-    gamepad = Gamepad()
+    keyboard = Keyboard()
+    # gamepad = Gamepad()
     
     p.setRealTimeSimulation(1)
     while True:
@@ -94,12 +94,10 @@ def main():
         env.reset()
         for i in range(1000):
             # input on keyboard or gamepad
-            dx, dy, dz, da = gamepad.control()
-            env.arm_control_joycon(dx, dy, dz, da, gamepad.grip)
-            
-            # action = keyboard.control()
-            # keyboard.update(action)
-            # env.arm_control(action)
+            # dx, dy, dz, da, grip = gamepad.control()
+            dx, dy, dz, da, grip = keyboard.control()
+            keyboard.update([dx, dy, dz, da, grip])
+            env.arm_control(dx, dy, dz, da, grip)
             
             # kuka_sim.get_top_img()
             # kuka_sim.get_hand_img()

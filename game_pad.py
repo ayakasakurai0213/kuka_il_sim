@@ -24,22 +24,22 @@ class Gamepad:
                 print(f"axis x: {dx}, axis y: {dy}")
                 
         if self.joycon.get_button(1):
-            dz = -0.003
+            dz -= 0.003
             print("down")
         if self.joycon.get_button(2):
-            dz = 0.003
+            dz += 0.003
             print("up")
         if self.joycon.get_button(9):
-            da = 0.10
+            da += 0.10
             print("left")
         if self.joycon.get_button(10):
-            da = -0.10
+            da -= 0.10
             print("right")
         if self.joycon.get_button(6):
             time.sleep(0.2)
             self.grip *= -1
             print("grip")
-        return dx, dy, dz, da
+        return dx, dy, dz, da, self.grip
 
 
 def main():
