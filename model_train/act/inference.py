@@ -19,6 +19,7 @@ import cv2
 import time
 import threading
 import math
+import copy
 import pybullet as p
 from env.kuka_ir_env import KukaIrEnv
 
@@ -336,7 +337,7 @@ class KukaOperator:
         
     def init(self):
         self.joint_ids = self.env._kuka.kukaGetJointIndex
-        self.control_joint_ids = self.joint_ids
+        self.control_joint_ids = copy.copy(self.joint_ids)
         finger_tip_ids = [10, 13]
         for i in range(2):
             self.control_joint_ids.append(finger_tip_ids[i])
@@ -371,14 +372,14 @@ class KukaOperator:
         return joint_pos
     
     def control_pos(self, action):
-        for i in range(2):
-            action.append(0)
+        new_act = np.zeros(len(action) + 2)
+        new_act[:-2] += action
         for i in range(len(self.control_joint_ids)):
             if i <= 7:
                 force = 200.
             else:
-                force = 2
-            p.setJointMotorControl2(self.kuka_id, self.control_joint_ids[i], p.POSITION_CONTROL, action[i], force=force)
+                force = 2.
+            p.setJointMotorControl2(self.kuka_id, self.control_joint_ids[i], p.POSITION_CONTROL, new_act[i], force=force)
         time.sleep(0.01)
         
     def get_top_img(self):
