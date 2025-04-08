@@ -336,6 +336,11 @@ class KukaOperator:
         
     def init(self):
         self.joint_ids = self.env._kuka.kukaGetJointIndex
+        self.control_joint_ids = self.joint_ids
+        finger_tip_ids = [10, 13]
+        for i in range(2):
+            self.control_joint_ids.append(finger_tip_ids[i])
+            
         self.param_ids = []
         joint_name_lst = []
         i_pos = [
@@ -366,17 +371,14 @@ class KukaOperator:
         return joint_pos
     
     def control_pos(self, action):
-        control_joint_ids = self.joint_ids
-        finger_tip_ids = [10, 13]
         for i in range(2):
-            control_joint_ids.append(finger_tip_ids[i])
             action.append(0)
-        for i in range(len(control_joint_ids)):
+        for i in range(len(self.control_joint_ids)):
             if i <= 7:
                 force = 200.
             else:
                 force = 2
-            p.setJointMotorControl2(self.kuka_id, control_joint_ids[i], p.POSITION_CONTROL, action[i], force=force)
+            p.setJointMotorControl2(self.kuka_id, self.control_joint_ids[i], p.POSITION_CONTROL, action[i], force=force)
         time.sleep(0.01)
         
     def get_top_img(self):
@@ -390,7 +392,6 @@ class KukaOperator:
         return rgb_img, depth_img
 
     def get_frame(self):
-        # self.control_pos()
         img_top, img_top_depth = self.get_top_img()
         # print("img_top:", img_top.shape)
         img_hand, img_hand_depth = self.get_hand_img()
