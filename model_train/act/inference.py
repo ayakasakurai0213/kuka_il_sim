@@ -366,8 +366,17 @@ class KukaOperator:
         return joint_pos
     
     def control_pos(self, action):
-        for i in range(len(self.param_ids)):
-            p.setJointMotorControl2(self.kuka_id, self.joint_ids[i], p.POSITION_CONTROL, action[i], force=5 * 240.)
+        control_joint_ids = self.joint_ids
+        finger_tip_ids = [10, 13]
+        for i in range(2):
+            control_joint_ids.append(finger_tip_ids[i])
+            action.append(0)
+        for i in range(len(control_joint_ids)):
+            if i <= 7:
+                force = 200.
+            else:
+                force = 2
+            p.setJointMotorControl2(self.kuka_id, control_joint_ids[i], p.POSITION_CONTROL, action[i], force=force)
         time.sleep(0.01)
         
     def get_top_img(self):

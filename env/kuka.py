@@ -19,7 +19,7 @@ class Kuka:
     self.maxVelocity = .35
     self.maxForce = 200.
     self.fingerAForce = 2
-    self.fingerBForce = 2.5
+    self.fingerBForce = 2
     self.fingerTipForce = 2
     self.useInverseKinematics = 1
     self.useSimulation = 1
