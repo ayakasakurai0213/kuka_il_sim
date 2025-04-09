@@ -3,6 +3,7 @@ root_dir = os.path.dirname(os.path.abspath(__file__))
 import cv2
 import pybullet as p
 import threading
+import argparse
 import time
 from env.kuka_ir_env import KukaIrEnv
 from keybord_control import Keyboard
@@ -76,12 +77,14 @@ class Kuka_sim:
         return hand_img
     
 
-def main():
+def main(args):
     env = KukaIrEnv(renders=True, isDiscrete=True, numObjects=1)
     env.reset()
     kuka_sim = Kuka_sim(env)
-    keyboard = Keyboard()
-    # gamepad = Gamepad()
+    if args.control == "keyboard":
+        keyboard = Keyboard()
+    elif args.control == "gamepad":
+        gamepad = Gamepad()
     
     p.setRealTimeSimulation(1)
     # kuka_sim.control_pos()
@@ -89,16 +92,21 @@ def main():
         env.reset()
         for i in range(1000):
             # input on keyboard or gamepad
-            # dx, dy, dz, da, grip = gamepad.control()
-            dx, dy, dz, da, grip = keyboard.control()
-            keyboard.update([dx, dy, dz, da, grip])
+            if args.control == "keyboard":
+                dx, dy, dz, da, grip = keyboard.control()
+                keyboard.update([dx, dy, dz, da, grip])
+            elif args.control == "gamepad":
+                dx, dy, dz, da, grip = gamepad.control()
             env.arm_control(dx, dy, dz, da, grip)
             
             # kuka_sim.get_top_img()
             # kuka_sim.get_hand_img()
-            # joint_pos = kuka_sim.get_joint()
-            # print(joint_pos[0])
+            joint_pos = kuka_sim.get_joint()
+            # print(joint_pos["qpos"])
         
 
 if __name__ == "__main__": 
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--control', action='store', type=str, help='control with keyboard or gamepad', default='keyboard', required=False)
+    args = parser.parse_args()
+    main(args)
