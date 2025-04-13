@@ -1,0 +1,16 @@
+services:
+  kuka-ir-sim:
+    container_name: kuka-ir-sim
+    image: kuka-ir-sim
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+    network_mode: host
+    ipc: host
+    environment:
+      - DISPLAY=:0.0
+    volumes:
+      - "/tmp/.X11-unix:/tmp/.X11-unix"
+    tty: true
+
