@@ -13,9 +13,9 @@ RUN rm -rf /var/lib/apt/lists/*
 RUN apt-get update -y
 RUN apt-get install -y git vim xterm x11-apps python3-pip libopencv-dev 
 
-RUN mkdir /root/il_ws
-WORKDIR /root/il_ws
-RUN git clone https://github.com/ayakasakurai0213/kuka_il_sim.git -b add_docker
+# RUN mkdir /root/il_ws
+# WORKDIR /root/il_ws
+# RUN git clone https://github.com/ayakasakurai0213/kuka_il_sim.git -b add_docker
 
 WORKDIR /root/il_ws/kuka_il_sim
 RUN ./install.sh

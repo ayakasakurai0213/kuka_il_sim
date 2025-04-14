@@ -7,18 +7,19 @@ pybulletの環境で模倣学習を実装しました．kuka iiwaロボットの
 ### ワークスペースの作成
 好きな場所に新しいディレクトリを作成し，その中にこのシミュレータのリポジトリをcloneしてください．
 ```
-mkdir ~/ir_ws
-cd ~/ir_ws
-git clone git@github.com:ayakasakurai0213/kuka_ir_sim.git
+mkdir ~/il_ws
+cd ~/il_ws
+git clone git@github.com:ayakasakurai0213/kuka_il_sim.git
 ```
 ### 仮想環境の構築
 以下のコマンドを実行してcondaの仮想環境を構築してください．
 ```
-conda create --name ir_sim python=3.10
+conda create --name il_sim python=3.10
 ```
 ### パッケージインストール
 上記で建てた仮想環境の中で以下のコマンドを実行し，必要なパッケージをインストールしてください．
 ```
+cd ~/il_ws/kuka_il_sim
 ./install.sh
 ```
 

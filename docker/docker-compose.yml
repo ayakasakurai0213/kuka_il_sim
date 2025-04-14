@@ -10,8 +10,17 @@ services:
     ipc: host
     environment:
       - DISPLAY=:0.0
+      # - NVIDIA_VISIBLE_DEVICES=all
+      # - NVIDIA_DRIVER_CAPABILITIES=all
     volumes:
       - "/tmp/.X11-unix:/tmp/.X11-unix"
       - "~/il_ws:/root/il_ws"
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
     tty: true
-
+    # privileged: true
