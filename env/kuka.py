@@ -28,6 +28,7 @@ class Kuka:
     self.kukaEndEffectorIndex = 6
     self.kukaGripperIndex = 7
     self.kukaHandCamIndex = 15
+    self.kukaGetJointIndex = [0, 1, 2, 3, 4, 5, 6, 7, 8, 11]
     #lower limits for null space
     self.ll = [-.967, -2, -2.96, 0.19, -2.96, -2.09, -3.05]
     #upper limits for null space
@@ -52,7 +53,7 @@ class Kuka:
                                       [0.000000, 0.000000, 0.000000, 1.000000])
     self.jointPositions = [
         0.006418, 0.413184, -0.011401, -1.589317, 0.005379, 1.137684, -0.006539, 0.000048,
-        -0.299912, 0.000000, -0.000043, 0.299960, 0.000000, -0.000200, 0.000000, 0.000000
+        -0.299912, 0.000000, 0.000000, 0.299960, 0.000000, 0.000000, 0.000000, 0.000000
     ]
     self.numJoints = p.getNumJoints(self.kukaUid)
     for jointIndex in range(self.numJoints):

@@ -14,6 +14,7 @@ import cv2
 import pybullet as p
 from env.kuka_ir_env import KukaIrEnv
 from keybord_control import Keyboard
+from game_pad import Gamepad
 
 
 def save_data(args, timesteps, actions, dataset_path):
@@ -68,10 +69,10 @@ def save_data(args, timesteps, actions, dataset_path):
                 _ = image_depth.create_dataset(cam_name, (data_size, 480, 640), dtype='uint16',
                                              chunks=(1, 480, 640), )
 
-        _ = obs.create_dataset('qpos', (data_size, 12))
-        _ = obs.create_dataset('qvel', (data_size, 12))
-        _ = obs.create_dataset('effort', (data_size, 12))
-        _ = root.create_dataset('action', (data_size, 12))
+        _ = obs.create_dataset('qpos', (data_size, 10))
+        _ = obs.create_dataset('qvel', (data_size, 10))
+        _ = obs.create_dataset('effort', (data_size, 10))
+        _ = root.create_dataset('action', (data_size, 10))
         _ = root.create_dataset('base_action', (data_size, 2))
 
         # data_dict write into h5py.File
@@ -84,29 +85,29 @@ class KukaOperator:
     def __init__(self, env, args):
         self.env = env
         self.kuka_id = self.env._kuka.kukaUid
-        self.keyboard = Keyboard()
         self.args = args
+        if self.args.control == "keyboard":
+            self.controller = Keyboard()
+        elif self.args.control == "gamepad":
+            self.controller = Gamepad()
         self.init()
         
 
     def init(self):
-        self.joint_ids = []
+        self.joint_ids = self.env._kuka.kukaGetJointIndex
         self.param_ids = []
         joint_name_lst = []
         i_pos = [
             0.006411874501842649, 0.41318442787173143, -0.01140244401433773, 
             -1.5893163205429706, 0.005379, 1.1376840457008266, -0.006534958891813817, 
-            5.800820781903633e-05, -0.29991772759079405, -4.1277527065243654e-05, 
-            0.299948297597285, -0.0002196091555209944
+            5.800820781903633e-05, -self.env.finger_angle, self.env.finger_angle
             ]
         # set joints
         for i in range(p.getNumJoints(self.kuka_id)):
             info = p.getJointInfo(self.kuka_id, i)
             # print(info)
             joint_name = info[1]
-            joint_type = info[2]
-            if joint_type == p.JOINT_PRISMATIC or joint_type == p.JOINT_REVOLUTE:
-                self.joint_ids.append(i) 
+            if i in self.joint_ids:
                 joint_name_lst.append(joint_name)
                 
         for i in range(len(self.joint_ids)):
@@ -120,15 +121,10 @@ class KukaOperator:
             joint_state = p.getJointState(self.kuka_id, self.joint_ids[i])
             for j in range(len(joint_state)):
                 joint_pos[keys[j]].append(joint_state[j])
+        joint_pos["qpos"][-2] = self.env.finger_angle * -1
+        joint_pos["qpos"][-1] = self.env.finger_angle
         return joint_pos
-    
-    
-    def control_key(self):
-        while True:
-            self.keyboard.action, self.keyboard.text = self.keyboard.get_pressed_key()
-            self.keyboard.update(self.keyboard.text)
-            self.env.arm_control(self.keyboard.action)
-    
+      
     
     def get_top_img(self):
         rgb_img, depth_img = self.env._get_observation()
@@ -139,29 +135,20 @@ class KukaOperator:
         rgb_img, depth_img = self.env._get_hand_cam()
         rgb_img = cv2.cvtColor(rgb_img, cv2.COLOR_RGB2BGR)
         return rgb_img, depth_img
+    
+    def get_img_thread(self):
+        while True:
+            img_top, img_top_depth = self.get_top_img()
+            img_hand, img_hand_depth = self.get_hand_img()
 
-
-    def get_frame(self):
-        # self.control_pos()
-        img_top, img_top_depth = self.get_top_img()
-        # print("img_top:", img_top.shape)
-        img_hand, img_hand_depth = self.get_hand_img()
-        arm_joint = self.get_joint()
-
-        if self.args.use_depth_image == False:
-            img_top_depth = None
-            img_hand_depth = None
-
-        robot_base = None
-        if self.args.use_robot_base:
-            robot_base = arm_joint["base_action"]
-        
-        return (img_top, img_hand, img_top_depth, img_hand_depth, arm_joint, robot_base)
+            if self.args.use_depth_image == False:
+                img_top_depth = None
+                img_hand_depth = None
+                
+            self.img_data = (img_top, img_hand, img_top_depth, img_hand_depth)
 
 
     def process(self):
-        thread = threading.Thread(target=self.control_key, name="keyboard_thread", daemon=True)
-        thread.start()
         timesteps = []
         actions = []
         # image data
@@ -170,21 +157,24 @@ class KukaOperator:
         for cam_name in self.args.camera_names:
             image_dict[cam_name] = image
         count = 0
-
-        print_flag = True
-
+        
+        thread = threading.Thread(target=self.get_img_thread, name="get_img_thread", daemon=True)
+        thread.start()
+        time.sleep(3)
         while count < self.args.max_timesteps + 1:
-            self.env.arm_control(self.keyboard.action)
+            dx, dy, dz, da, grip = self.controller.control()
+            if self.args.control == "keyboard":
+                self.controller.update([dx, dy, dz, da, grip])
+            self.env.arm_control(dx, dy, dz, da, grip)
+            
             # collecting image and joint data
-            result = self.get_frame()
-            if not result:
-                if print_flag:
-                    print("syn fail")
-                    print_flag = False
-                continue
-            print_flag = True
             count += 1
-            (img_top, img_hand, img_top_depth, img_hand_depth, arm_joint, robot_base) = result
+            (img_top, img_hand, img_top_depth, img_hand_depth) = self.img_data
+            arm_joint = self.get_joint()
+            robot_base = None
+            if self.args.use_robot_base:
+                robot_base = arm_joint["base_action"]
+                
             # image info
             image_dict = dict()
             image_dict[self.args.camera_names[0]] = img_top
@@ -250,6 +240,8 @@ def get_arguments():
     # collect depth image
     parser.add_argument('--use_depth_image', action='store', type=bool, help='use_depth_image',
                         default=False, required=False)
+    parser.add_argument('--control', action='store', type=str, help='control with keyboard or gamepad', 
+                        default='keyboard', required=False)
     
     args = parser.parse_args()
     return args
