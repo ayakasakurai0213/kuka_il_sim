@@ -135,29 +135,20 @@ class KukaOperator:
         rgb_img, depth_img = self.env._get_hand_cam()
         rgb_img = cv2.cvtColor(rgb_img, cv2.COLOR_RGB2BGR)
         return rgb_img, depth_img
+    
+    def get_img_thread(self):
+        while True:
+            img_top, img_top_depth = self.get_top_img()
+            img_hand, img_hand_depth = self.get_hand_img()
 
-
-    def get_frame(self):
-        img_top, img_top_depth = self.get_top_img()
-        # print("img_top:", img_top.shape)
-        img_hand, img_hand_depth = self.get_hand_img()
-        arm_joint = self.get_joint()
-        # print(arm_joint)
-
-        if self.args.use_depth_image == False:
-            img_top_depth = None
-            img_hand_depth = None
-
-        robot_base = None
-        if self.args.use_robot_base:
-            robot_base = arm_joint["base_action"]
-        
-        return (img_top, img_hand, img_top_depth, img_hand_depth, arm_joint, robot_base)
+            if self.args.use_depth_image == False:
+                img_top_depth = None
+                img_hand_depth = None
+                
+            self.img_data = (img_top, img_hand, img_top_depth, img_hand_depth)
 
 
     def process(self):
-        # thread = threading.Thread(target=self.control_key, name="keyboard_thread", daemon=True)
-        # thread.start()
         timesteps = []
         actions = []
         # image data
@@ -166,9 +157,10 @@ class KukaOperator:
         for cam_name in self.args.camera_names:
             image_dict[cam_name] = image
         count = 0
-
-        print_flag = True
-
+        
+        thread = threading.Thread(target=self.get_img_thread, name="get_img_thread", daemon=True)
+        thread.start()
+        time.sleep(3)
         while count < self.args.max_timesteps + 1:
             dx, dy, dz, da, grip = self.controller.control()
             if self.args.control == "keyboard":
@@ -176,15 +168,13 @@ class KukaOperator:
             self.env.arm_control(dx, dy, dz, da, grip)
             
             # collecting image and joint data
-            result = self.get_frame()
-            if not result:
-                if print_flag:
-                    print("syn fail")
-                    print_flag = False
-                continue
-            print_flag = True
             count += 1
-            (img_top, img_hand, img_top_depth, img_hand_depth, arm_joint, robot_base) = result
+            (img_top, img_hand, img_top_depth, img_hand_depth) = self.img_data
+            arm_joint = self.get_joint()
+            robot_base = None
+            if self.args.use_robot_base:
+                robot_base = arm_joint["base_action"]
+                
             # image info
             image_dict = dict()
             image_dict[self.args.camera_names[0]] = img_top
