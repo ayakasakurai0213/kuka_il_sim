@@ -20,7 +20,7 @@ conda create --name il_sim python=3.10
 上記で建てた仮想環境の中で以下のコマンドを実行し，必要なパッケージをインストールしてください．
 ```
 cd ~/il_ws/kuka_il_sim
-./install.sh
+./build/install.sh
 ```
 
 ## 使い方

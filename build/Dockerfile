@@ -18,6 +18,6 @@ WORKDIR /root/il_ws
 RUN git clone https://github.com/ayakasakurai0213/kuka_il_sim.git -b add_docker
 
 WORKDIR /root/il_ws/kuka_il_sim
-RUN ./install.sh
+RUN ./build/install.sh
 
 WORKDIR /root/il_ws
