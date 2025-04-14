@@ -14,6 +14,7 @@ import cv2
 import pybullet as p
 from env.kuka_ir_env import KukaIrEnv
 from keybord_control import Keyboard
+from game_pad import Gamepad
 
 
 def save_data(args, timesteps, actions, dataset_path):
@@ -84,8 +85,11 @@ class KukaOperator:
     def __init__(self, env, args):
         self.env = env
         self.kuka_id = self.env._kuka.kukaUid
-        self.keyboard = Keyboard()
         self.args = args
+        if self.args.control == "keyboard":
+            self.controller = Keyboard()
+        elif self.args.control == "gamepad":
+            self.controller = Gamepad()
         self.init()
         
 
@@ -120,14 +124,7 @@ class KukaOperator:
         joint_pos["qpos"][-2] = self.env.finger_angle * -1
         joint_pos["qpos"][-1] = self.env.finger_angle
         return joint_pos
-    
-    
-    def control_key(self):
-        while True:
-            self.keyboard.action, self.keyboard.text = self.keyboard.get_pressed_key()
-            self.keyboard.update(self.keyboard.text)
-            self.env.arm_control(self.keyboard.action)
-    
+      
     
     def get_top_img(self):
         rgb_img, depth_img = self.env._get_observation()
@@ -141,7 +138,6 @@ class KukaOperator:
 
 
     def get_frame(self):
-        # self.control_pos()
         img_top, img_top_depth = self.get_top_img()
         # print("img_top:", img_top.shape)
         img_hand, img_hand_depth = self.get_hand_img()
@@ -160,8 +156,8 @@ class KukaOperator:
 
 
     def process(self):
-        thread = threading.Thread(target=self.control_key, name="keyboard_thread", daemon=True)
-        thread.start()
+        # thread = threading.Thread(target=self.control_key, name="keyboard_thread", daemon=True)
+        # thread.start()
         timesteps = []
         actions = []
         # image data
@@ -174,7 +170,11 @@ class KukaOperator:
         print_flag = True
 
         while count < self.args.max_timesteps + 1:
-            self.env.arm_control(self.keyboard.action)
+            dx, dy, dz, da, grip = self.controller.control()
+            if self.args.control == "keyboard":
+                self.controller.update([dx, dy, dz, da, grip])
+            self.env.arm_control(dx, dy, dz, da, grip)
+            
             # collecting image and joint data
             result = self.get_frame()
             if not result:
@@ -250,6 +250,8 @@ def get_arguments():
     # collect depth image
     parser.add_argument('--use_depth_image', action='store', type=bool, help='use_depth_image',
                         default=False, required=False)
+    parser.add_argument('--control', action='store', type=str, help='control with keyboard or gamepad', 
+                        default='keyboard', required=False)
     
     args = parser.parse_args()
     return args

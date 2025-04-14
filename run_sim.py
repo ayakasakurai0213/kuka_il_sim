@@ -76,31 +76,34 @@ class Kuka_sim:
         # cv2.imwrite("images/test2.jpg", hand_img)
         return hand_img
     
+    def get_img(self):
+        while True:
+            self.get_top_img()
+            self.get_hand_img()
+    
 
 def main(args):
     env = KukaIrEnv(renders=True, isDiscrete=True, numObjects=1)
     env.reset()
     kuka_sim = Kuka_sim(env)
     if args.control == "keyboard":
-        keyboard = Keyboard()
+        controller = Keyboard()
     elif args.control == "gamepad":
-        gamepad = Gamepad()
+        controller = Gamepad()
     
     p.setRealTimeSimulation(1)
     # kuka_sim.control_pos()
     while True:
         env.reset()
+        thread = threading.Thread(target=kuka_sim.get_img, name="get_image_thread", daemon=True)
+        thread.start()
         for i in range(1000):
             # input on keyboard or gamepad
+            dx, dy, dz, da, grip = controller.control()
             if args.control == "keyboard":
-                dx, dy, dz, da, grip = keyboard.control()
-                keyboard.update([dx, dy, dz, da, grip])
-            elif args.control == "gamepad":
-                dx, dy, dz, da, grip = gamepad.control()
+                controller.update([dx, dy, dz, da, grip])
             env.arm_control(dx, dy, dz, da, grip)
             
-            # kuka_sim.get_top_img()
-            # kuka_sim.get_hand_img()
             joint_pos = kuka_sim.get_joint()
             # print(joint_pos["qpos"])
         
