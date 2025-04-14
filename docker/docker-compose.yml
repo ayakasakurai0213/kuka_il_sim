@@ -10,7 +10,6 @@ services:
     ipc: host
     environment:
       - DISPLAY=:0.0
-      - TZ=:Asia/Tokyo
     volumes:
       - "/tmp/.X11-unix:/tmp/.X11-unix"
       - "~/il_ws:/root/il_ws"
