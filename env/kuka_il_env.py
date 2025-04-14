@@ -15,7 +15,7 @@ from pkg_resources import parse_version
 import gym
 
 
-class KukaIrEnv(KukaGymEnv):
+class KukaIlEnv(KukaGymEnv):
   """Class for Kuka environment with diverse objects.
 
   In each episode some objects are chosen from a set of 1000 diverse objects.

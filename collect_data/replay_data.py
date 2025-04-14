@@ -8,7 +8,7 @@ import cv2
 import h5py
 import argparse
 import pybullet as p
-from env.kuka_ir_env import KukaIrEnv
+from env.kuka_il_env import KukaIlEnv
 
 
 def load_hdf5(dataset_dir, dataset_name):
@@ -58,7 +58,7 @@ def main(args):
     task_name   = args.task_name
     dataset_name = f'episode_{episode_idx}'
     
-    env = KukaIrEnv(renders=True, isDiscrete=True)
+    env = KukaIlEnv(renders=True, isDiscrete=True)
     env.reset()
     kuka_id = env._kuka.kukaUid
     joint_ids = env._kuka.kukaGetJointIndex

@@ -12,7 +12,7 @@ import dm_env
 import collections
 import cv2
 import pybullet as p
-from env.kuka_ir_env import KukaIrEnv
+from env.kuka_il_env import KukaIlEnv
 from keybord_control import Keyboard
 from game_pad import Gamepad
 
@@ -160,7 +160,9 @@ class KukaOperator:
         
         thread = threading.Thread(target=self.get_img_thread, name="get_img_thread", daemon=True)
         thread.start()
+        print("loading thread...")
         time.sleep(3)
+        print("start.")
         while count < self.args.max_timesteps + 1:
             dx, dy, dz, da, grip = self.controller.control()
             if self.args.control == "keyboard":
@@ -248,7 +250,7 @@ def get_arguments():
 
 
 def main():
-    env = KukaIrEnv(renders=True, isDiscrete=True, numObjects=1)
+    env = KukaIlEnv(renders=True, isDiscrete=True, numObjects=1)
     env.reset()
     args = get_arguments()
     kuka_operator = KukaOperator(env, args)

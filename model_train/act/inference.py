@@ -21,7 +21,7 @@ import threading
 import math
 import copy
 import pybullet as p
-from env.kuka_ir_env import KukaIrEnv
+from env.kuka_il_env import KukaIlEnv
 
 import sys
 sys.path.append("./")
@@ -468,7 +468,7 @@ def get_arguments():
 
 def main():
     args = get_arguments()
-    env = KukaIrEnv(renders=True, isDiscrete=True)
+    env = KukaIlEnv(renders=True, isDiscrete=True)
     env.reset()
     kuka_operator = KukaOperator(env, args)
     config = get_model_config(args)

@@ -5,7 +5,7 @@ import pybullet as p
 import threading
 import argparse
 import time
-from env.kuka_ir_env import KukaIrEnv
+from env.kuka_il_env import KukaIlEnv
 from keybord_control import Keyboard
 from game_pad import Gamepad
 
@@ -83,7 +83,7 @@ class Kuka_sim:
     
 
 def main(args):
-    env = KukaIrEnv(renders=True, isDiscrete=True, numObjects=1)
+    env = KukaIlEnv(renders=True, isDiscrete=True, numObjects=1)
     env.reset()
     kuka_sim = Kuka_sim(env)
     if args.control == "keyboard":
