@@ -14,7 +14,7 @@ services:
     volumes:
       - "/tmp/.X11-unix:/tmp/.X11-unix"
       - "~/il_ws:/root/il_ws"
-    #   - "/dev/input:/dev/input"
+      - "/proc/bus/input/devices:/dev/input/js0"
     # deploy:
     #   resources:
     #     reservations:
