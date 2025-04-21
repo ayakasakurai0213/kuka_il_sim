@@ -26,24 +26,24 @@ class Gamepad:
                 dx = round(self.joystick.get_axis(0) / 130, 3) * -1
                 dy = round(self.joystick.get_axis(1) / 130, 3)
                 
-                print(f"axis x: {dx}, axis y: {dy}")
+                # print(f"axis x: {dx}, axis y: {dy}")
                 
         if self.joystick.get_button(self.button["down"]):
             dz -= 0.003
-            print("down")
+            # print("down")
         if self.joystick.get_button(self.button["up"]):
             dz += 0.003
-            print("up")
+            # print("up")
         if self.joystick.get_button(self.button["left"]):
             da += 0.10
-            print("left")
+            # print("left")
         if self.joystick.get_button(self.button["right"]):
             da -= 0.10
-            print("right")
+            # print("right")
         if self.joystick.get_button(self.button["grip"]):
             time.sleep(0.2)
             self.grip *= -1
-            print("grip")
+            # print("grip")
         return dx, dy, dz, da, self.grip
     
     
