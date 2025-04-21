@@ -11,10 +11,12 @@ services:
       - DISPLAY=:0.0
       # - NVIDIA_VISIBLE_DEVICES=all
       # - NVIDIA_DRIVER_CAPABILITIES=all
+    devices:
+      - "/dev/bus/usb:/dev/input"
     volumes:
       - "/tmp/.X11-unix:/tmp/.X11-unix"
       - "~/il_ws:/root/il_ws"
-      - "/proc/bus/input/devices:/dev/input/js0"
+      - "/proc/bus/input/devices:/dev/usb/hiddev0"
     # deploy:
     #   resources:
     #     reservations:
