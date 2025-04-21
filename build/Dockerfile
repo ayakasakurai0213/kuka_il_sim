@@ -11,7 +11,7 @@ RUN apt-get clean
 RUN rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update -y
-RUN apt-get install -y git vim xterm x11-apps python3-pip libopencv-dev 
+RUN apt-get install -y git vim xterm x11-apps python3-pip libopencv-dev usbutils
 
 RUN mkdir /root/il_ws
 WORKDIR /root/il_ws
