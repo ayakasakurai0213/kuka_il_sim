@@ -1,0 +1,26 @@
+services:
+  kuka-il-sim:
+    container_name: kuka-il-sim
+    image: kuka-il-sim
+    build:
+      context: .
+      dockerfile: Dockerfile
+    network_mode: host
+    ipc: host
+    environment:
+      - DISPLAY=:0.0
+      # - NVIDIA_VISIBLE_DEVICES=all
+      # - NVIDIA_DRIVER_CAPABILITIES=all
+    volumes:
+      - "/tmp/.X11-unix:/tmp/.X11-unix"
+      - "~/il_ws:/root/il_ws"
+      - "/proc/bus/input/devices:/dev/input/js0"
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+    tty: true
+    # privileged: true

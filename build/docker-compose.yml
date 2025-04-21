@@ -9,18 +9,20 @@ services:
     ipc: host
     environment:
       - DISPLAY=:0.0
-      # - NVIDIA_VISIBLE_DEVICES=all
-      # - NVIDIA_DRIVER_CAPABILITIES=all
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+    devices:
+      - "/dev/input:/dev/input"
     volumes:
       - "/tmp/.X11-unix:/tmp/.X11-unix"
-      - "~/il_ws:/root/il_ws"
-      - "/proc/bus/input/devices:/dev/input/js0"
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: all
-    #           capabilities: [gpu]
+      - "${HOME}/il_ws:/root/il_ws"
+      - "/dev/usb:/dev/usb"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     tty: true
-    # privileged: true
+    privileged: true
