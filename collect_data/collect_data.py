@@ -88,8 +88,11 @@ class KukaOperator:
         self.args = args
         if self.args.control == "keyboard":
             self.controller = Keyboard()
-        elif self.args.control == "gamepad":
-            self.controller = Gamepad()
+        else:
+            if args.control in ["joycon", "dualshock"]:
+                self.controller = Gamepad(args.control)
+            else:
+                raise Exception("Error! Please input 'joycon' or 'dualshock' in argument: control.")
         self.init()
         
 
@@ -242,7 +245,7 @@ def get_arguments():
     # collect depth image
     parser.add_argument('--use_depth_image', action='store', type=bool, help='use_depth_image',
                         default=False, required=False)
-    parser.add_argument('--control', action='store', type=str, help='control with "keyboard" or "gamepad"', 
+    parser.add_argument('--control', action='store', type=str, help='control with "keyboard", "joycon" or "dualshock"', 
                         default='keyboard', required=False)
     
     args = parser.parse_args()

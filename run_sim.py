@@ -88,8 +88,11 @@ def main(args):
     kuka_sim = Kuka_sim(env)
     if args.control == "keyboard":
         controller = Keyboard()
-    elif args.control == "gamepad":
-        controller = Gamepad()
+    else:
+        if args.control in ["joycon", "dualshock"]:
+            controller = Gamepad(args.control)
+        else:
+            raise Exception("Error! Please input 'joycon' or 'dualshock' in argument: control.")
     
     p.setRealTimeSimulation(1)
     # kuka_sim.control_pos()
@@ -110,6 +113,6 @@ def main(args):
 
 if __name__ == "__main__": 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--control', action='store', type=str, help='control with keyboard or gamepad', default='keyboard', required=False)
+    parser.add_argument('--control', action='store', type=str, help='control with "keyboard", "joycon" or "dualshock"', default='keyboard', required=False)
     args = parser.parse_args()
     main(args)
